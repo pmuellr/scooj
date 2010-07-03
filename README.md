@@ -17,7 +17,9 @@ small require() system for browser JavaScript, I'll write a version of
 instance methods and static methods.  Classes can have superclasses, and
 a real super method invocation is available.
 
-See the [examples](test/scooj.sample/sample.html) for some basic use cases.
+See the
+[examples](http://pmuellr.github.com/scooj/test/scooj.sample/sample.html) 
+for some basic use cases.
 
 Usage
 -------------------------------------------------------------------------------
