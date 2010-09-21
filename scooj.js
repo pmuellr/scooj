@@ -47,8 +47,8 @@ defScooj(function defClass(superclass, func) {
     }
     
     if (superclass) {
-        if (!superclass._scooj) throw new Error("superclass is not a defined class")
-        if (!superclass._scooj.isClass) throw new Error("superclass is not a defined class")
+        // if (!superclass._scooj) throw new Error("superclass is not a defined class")
+        // if (!superclass._scooj.isClass) throw new Error("superclass is not a defined class")
     }
 
     ensureNamedFunction(func)
@@ -69,6 +69,10 @@ defScooj(function defClass(superclass, func) {
     func._scooj.fullClassName = fullClassName
     func._scooj.methods = {}
     func._scooj.staticMethods = {}
+    func._scooj.getters = {}
+    func._scooj.setters = {}
+    func._scooj.staticGetters = {}
+    func._scooj.staticSetters = {}
     
     scooj._classes[fullClassName] = func
     
@@ -93,14 +97,42 @@ defScooj(function defClass(superclass, func) {
 // scooj.defMethod(function)
 //----------------------------------------------------------------------------
 defScooj(function defMethod(func) {
-    addMethod(func, false)
+    addMethod(func, false, false, false)
 })
 
 //----------------------------------------------------------------------------
 // scooj.defStaticMethod(function)
 //----------------------------------------------------------------------------
 defScooj(function defStaticMethod(func) {
-    addMethod(func, true)
+    addMethod(func, true, false, false)
+})
+
+//----------------------------------------------------------------------------
+// scooj.defGetter(function)
+//----------------------------------------------------------------------------
+defScooj(function defGetter(func) {
+    addMethod(func, false, true, false)
+})
+
+//----------------------------------------------------------------------------
+// scooj.defSetter(function)
+//----------------------------------------------------------------------------
+defScooj(function defSetter(func) {
+    addMethod(func, false, false, true)
+})
+
+//----------------------------------------------------------------------------
+// scooj.defStaticGetter(function)
+//----------------------------------------------------------------------------
+defScooj(function defStaticGetter(func) {
+    addMethod(func, true, true, false)
+})
+
+//----------------------------------------------------------------------------
+// scooj.defStaticSetter(function)
+//----------------------------------------------------------------------------
+defScooj(function defStaticSetter(func) {
+    addMethod(func, true, false, true)
 })
 
 //----------------------------------------------------------------------------
@@ -123,6 +155,10 @@ defScooj(function installGlobals() {
         "defSuperclass",
         "defMethod",
         "defStaticMethod",
+        "defGetter",
+        "defSetter",
+        "defStaticGetter",
+        "defStaticSetter",
         "defSuper"
     ]
     
@@ -178,14 +214,32 @@ function getSuperMethod(owningClass) {
 //----------------------------------------------------------------------------
 // add a method to a class
 //----------------------------------------------------------------------------
-function addMethod(func, isStatic) {
-    isStatic = !!isStatic
-    
+function addMethod(func, isStatic, isGetter, isSetter) {
     ensureNamedFunction(func)
     var klass = ensureClassCurrentlyDefined()
     
-    var methodContainer = isStatic ? klass._scooj.staticMethods : klass._scooj.methods
-
+    var methodContainer
+    if (isGetter) {
+    	if (isStatic) 
+    		methodContainer = klass._scooj.staticGetters
+    	else
+    		methodContainer = klass._scooj.getters
+    }
+    
+    else if (isSetter) {
+    	if (isStatic) 
+    		methodContainer = klass._scooj.staticSetters
+    	else
+    		methodContainer = klass._scooj.setters
+    }
+    
+    else {
+    	if (isStatic) 
+    		methodContainer = klass._scooj.staticMethods
+    	else
+    		methodContainer = klass._scooj.methods
+    }
+    
     if (methodContainer.hasOwnProperty(func.name)) {
         throw new Error("method is already defined in class: " + klass.name + "." + func.name)
     }
@@ -194,15 +248,27 @@ function addMethod(func, isStatic) {
     func._scooj.owningClass = klass
     func._scooj.isMethod = true
     func._scooj.isStatic = isStatic
+    func._scooj.isGetter = isGetter
+    func._scooj.isSetter = isSetter
     
     methodContainer[func.name] = func
     
     if (isStatic) {
-        klass[func.name] = func
+    	if (isGetter)
+    		klass.__defineGetter__(func.name, func)
+    	else if (isSetter)
+    		klass.__defineSetter__(func.name, func)
+    	else 
+    		klass[func.name] = func
     }
     
     else {
-        klass.prototype[func.name] = func
+    	if (isGetter)
+    		klass.prototype.__defineGetter__(func.name, func)
+    	else if (isSetter)
+    		klass.prototype.__defineSetter__(func.name, func)
+    	else 
+    		klass.prototype[func.name] = func
     }
 }
 
