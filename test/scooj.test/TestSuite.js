@@ -4,13 +4,9 @@
 // http://www.opensource.org/licenses/mit-license.php
 //-----------------------------------------------------------------------------
 
-(function() {
-
 //-------------------------------------------------------------------
-defPackage("scooj.test")
-
-//-------------------------------------------------------------------
-defClass(function TestSuite() {})
+defClass(module, function TestSuite() {
+})
 
 //-------------------------------------------------------------------
 defStaticMethod(function suiteSetUp() {})
@@ -54,6 +50,3 @@ defMethod(function fail(message) {
     ex.isAssertionError = true
     throw ex
 })  
-
-//-------------------------------------------------------------------
-})()

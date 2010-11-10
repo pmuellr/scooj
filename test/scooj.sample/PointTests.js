@@ -4,13 +4,13 @@
 // http://www.opensource.org/licenses/mit-license.php
 //-----------------------------------------------------------------------------
 
-(function() {
+var TestSuite = require("../testRunner/TestSuite").$
+var Point2    = require("./Point2").$
+var Point3    = require("./Point3").$
+var Point4    = require("./Point4").$
 
 //----------------------------------------------------------------------------
-defPackage("scooj.sample")
-
-//----------------------------------------------------------------------------
-defClass(scooj.test.TestSuite, function PointTests(){
+defClass(module, TestSuite, function PointTests(){
     $super(this, null)
 })
 
@@ -19,35 +19,35 @@ var $super = defSuper()
 
 //----------------------------------------------------------------------------
 defStaticMethod(function suiteSetUp() {
-    console.log("suiteSetUp()")
+//    console.log("suiteSetUp()")
 })
 
 //----------------------------------------------------------------------------
 defStaticMethod(function suiteTearDown() {
-    console.log("suiteTearDown()")
+//    console.log("suiteTearDown()")
 })
 
 //----------------------------------------------------------------------------
 defMethod(function setUp() {
-    this.p2a = new scooj.sample.Point2({x:   2, y:   7})
-    this.p2b = new scooj.sample.Point2({x:  77, y:  22})
-    this.p3a = new scooj.sample.Point3({x:   3, y:   8, z: 101})
-    this.p3b = new scooj.sample.Point3({x:  88, y:  33, z: 313})
-    this.p4a = new scooj.sample.Point4({x:   4, y:   9, z: 202, a: 41})
-    this.p4b = new scooj.sample.Point4({x:  99, y:  44, z: 626, a: 42})
+    this.p2a = new Point2({x:   2, y:   7})
+    this.p2b = new Point2({x:  77, y:  22})
+    this.p3a = new Point3({x:   3, y:   8, z: 101})
+    this.p3b = new Point3({x:  88, y:  33, z: 313})
+    this.p4a = new Point4({x:   4, y:   9, z: 202, a: 41})
+    this.p4b = new Point4({x:  99, y:  44, z: 626, a: 42})
     
-    console.log("setUp()")
-    console.log("p2a: " + this.p2a.toString())
-    console.log("p2b: " + this.p2b.toString())
-    console.log("p3a: " + this.p3a.toString())
-    console.log("p3b: " + this.p3b.toString())
-    console.log("p4a: " + this.p4a.toString())
-    console.log("p4b: " + this.p4b.toString())
+//    console.log("setUp()")
+//    console.log("p2a: " + this.p2a.toString())
+//    console.log("p2b: " + this.p2b.toString())
+//    console.log("p3a: " + this.p3a.toString())
+//    console.log("p3b: " + this.p3b.toString())
+//    console.log("p4a: " + this.p4a.toString())
+//    console.log("p4b: " + this.p4b.toString())
 })
 
 //----------------------------------------------------------------------------
 defMethod(function tearDown() {
-    console.log("tearDown()")
+//    console.log("tearDown()")
 })
 
 //----------------------------------------------------------------------------
@@ -102,6 +102,3 @@ defMethod(function test_error() {
 })
     
 }
-
-//-------------------------------------------------------------------
-})()

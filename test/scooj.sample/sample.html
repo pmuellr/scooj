@@ -56,8 +56,11 @@ ul.test-messages li.test-message-none { background-color: inherit; }
 <script>
 
 //----------------------------------------------------------------------------
-var testRunner = new scooj.test.TestRunner();
-testRunner.addTestSuite(scooj.sample.PointTests);
+var TestRunner = require("../testRunner/TestRunner").cls
+var PointTests = require("./PointTests").cls
+
+var testRunner = new TestRunner()
+testRunner.addTestSuite(new PointTests());
 var results = testRunner.run();
 
 var html = scooj.test.TestRunner.resultsAsHTML(results);

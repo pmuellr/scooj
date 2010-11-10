@@ -4,13 +4,8 @@
 // http://www.opensource.org/licenses/mit-license.php
 //-----------------------------------------------------------------------------
 
-(function() {
-
 //----------------------------------------------------------------------------
-defPackage("scooj.sample")
-
-//----------------------------------------------------------------------------
-defClass(function Point2(properties) {
+defClass(module, function Point2(properties) {
     if (!properties) return
     
     for (var key in properties) {
@@ -31,15 +26,11 @@ defMethod(function add(aPoint) {
 //----------------------------------------------------------------------------
 defMethod(function toString() {
     var result = this.constructor.name + "{ "
-    
-    for (var name in this) {
-        result += name + ":" + this[name] + "; "
-    }
+
+    result += "x:" + this.x + "; "
+    result += "y:" + this.y + "; "
     
     result += "}"
     
     return result
 })
-
-//-------------------------------------------------------------------
-})()

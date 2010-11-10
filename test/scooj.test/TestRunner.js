@@ -4,13 +4,8 @@
 // http://www.opensource.org/licenses/mit-license.php
 //-----------------------------------------------------------------------------
 
-(function() {
-
 //-------------------------------------------------------------------
-defPackage("scooj.test")
-
-//-------------------------------------------------------------------
-defClass(function TestRunner() {
+defClass(module, function TestRunner() {
     this.suites = []
 })
 
@@ -35,7 +30,6 @@ defMethod(function run(results) {
 
 //-------------------------------------------------------------------
 defMethod(function _runSuite(suiteClass, results) {
-
     if (!this._runCatching(suiteClass, "suiteSetUp", results)) return    
     
     var tests = this._getTests(suiteClass)
@@ -65,7 +59,7 @@ defMethod(function _newSuite(suiteClass, results) {
 defMethod(function _runCatching(suite, methodName, results) {
     var func
     
-    if (!suite[methodName]) return
+    if (!suite[methodName]) return true
     
     try {
         suite[methodName].call(suite)
@@ -148,4 +142,24 @@ defStaticMethod(function resultsAsHTML(results) {
 })
 
 //-------------------------------------------------------------------
-})()
+defStaticMethod(function resultsToConsole(results) {
+
+    function generateSection(title, type) {
+        console.log(title)
+        
+        for (var i=0; i<results[type].length; i++) {
+            console.log("    " + results[type][i])
+        }
+
+        if (0 == results[type].length) {
+            console.log("    none")
+        }
+        
+        console.log()
+        
+    }
+    
+    generateSection("Passing  tests", "passes")
+    generateSection("Failing  tests", "fails")
+    generateSection("Erroring tests", "errors")
+})

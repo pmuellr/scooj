@@ -4,73 +4,59 @@
 // http://www.opensource.org/licenses/mit-license.php
 //-----------------------------------------------------------------------------
 
-(function(){
-    
-if (this.scooj) return
-
-this.scooj = {}
-
 //----------------------------------------------------------------------------
-// scooj properties
+// make sure running in CommonJS
 //----------------------------------------------------------------------------
-scooj._global         = this
-scooj._packages       = {}
-scooj._classes        = {}
-scooj._currentPackage = null
-scooj._currentClass   = null
-
-scooj.debug           = false
-
-//----------------------------------------------------------------------------
-// shortcut for defining scooj functions
-//----------------------------------------------------------------------------
-function defScooj(func) {
-    ensureNamedFunction(func)
-    
-    scooj[func.name] = func
+if (typeof exports == "undefined") {
+    throw new Error("exports undefined; not running in a CommonJS environment?")
 }
 
 //----------------------------------------------------------------------------
-// scooj.defPackage(string)
+// hidden globals
 //----------------------------------------------------------------------------
-defScooj(function defPackage(name) {
-    scooj._currentPackage = name
-})
+var scooj = {}
+
+scooj._global         = getGlobalObject()
+scooj._classes        = {}
+scooj._currentClass   = null
 
 //----------------------------------------------------------------------------
-// scooj.defClass(function)
+// 
 //----------------------------------------------------------------------------
-defScooj(function defClass(superclass, func) {
+export(function defClass(module, superclass, func) {
+    if (null == module) {
+        throw new Error("must pass a module as the first parameter")
+    }
+    
+    if (null == module.id) {
+        throw new Error("module parameter has no id")
+    }
+    
     if (null == func) {
         func = superclass
         superclass = null
     }
     
-    if (superclass) {
-        // if (!superclass._scooj) throw new Error("superclass is not a defined class")
-        // if (!superclass._scooj.isClass) throw new Error("superclass is not a defined class")
-    }
-
     ensureNamedFunction(func)
     
-    var fullClassName = getFullClassName(null, func.name)
+    var fullClassName = module.id + "::" + func.name
     
     if (scooj._classes.hasOwnProperty(fullClassName)) {
         throw new Error("class is already defined: " + fullClassName)
     }
     
     func._scooj = {}
-    func._scooj.isClass = true
-    func._scooj.owningClass = func
-    func._scooj.superclass = superclass
-    func._scooj.subclasses = {}
-    func._scooj.name = func.name
-    func._scooj.packageName = scooj._currentPackage
+    func._scooj.isClass       = true
+    func._scooj.owningClass   = func
+    func._scooj.superclass    = superclass
+    func._scooj.subclasses    = {}
+    func._scooj.name          = func.name
+    func._scooj.moduleId      = module.id
     func._scooj.fullClassName = fullClassName
-    func._scooj.methods = {}
+    func._scooj.methods       = {}
     func._scooj.staticMethods = {}
-    func._scooj.getters = {}
-    func._scooj.setters = {}
+    func._scooj.getters       = {}
+    func._scooj.setters       = {}
     func._scooj.staticGetters = {}
     func._scooj.staticSetters = {}
     
@@ -84,75 +70,42 @@ defScooj(function defClass(superclass, func) {
         T.prototype = superclass.prototype
         func.prototype = new T()
         func.prototype.constructor = func
-        
-        scooj.defStaticMethod(getSuperMethod(func))
     }
 
-    defineGlobalFunction(func)
+    module.exports[func.name] = func
+    
+    if (typeof module.exports.$ == "undefined") {
+        module.exports.$      = func
+    }
     
     return func
 })
 
 //----------------------------------------------------------------------------
-// scooj.defMethod(function)
+// method/accessor definers
 //----------------------------------------------------------------------------
-defScooj(function defMethod(func) {
-    addMethod(func, false, false, false)
-})
-
-//----------------------------------------------------------------------------
-// scooj.defStaticMethod(function)
-//----------------------------------------------------------------------------
-defScooj(function defStaticMethod(func) {
-    addMethod(func, true, false, false)
-})
-
-//----------------------------------------------------------------------------
-// scooj.defGetter(function)
-//----------------------------------------------------------------------------
-defScooj(function defGetter(func) {
-    addMethod(func, false, true, false)
-})
-
-//----------------------------------------------------------------------------
-// scooj.defSetter(function)
-//----------------------------------------------------------------------------
-defScooj(function defSetter(func) {
-    addMethod(func, false, false, true)
-})
-
-//----------------------------------------------------------------------------
-// scooj.defStaticGetter(function)
-//----------------------------------------------------------------------------
-defScooj(function defStaticGetter(func) {
-    addMethod(func, true, true, false)
-})
-
-//----------------------------------------------------------------------------
-// scooj.defStaticSetter(function)
-//----------------------------------------------------------------------------
-defScooj(function defStaticSetter(func) {
-    addMethod(func, true, false, true)
-})
+export(function defMethod(func)       {return addMethod(func, false, false, false)})
+export(function defStaticMethod(func) {return addMethod(func, true,  false, false)})
+export(function defGetter(func)       {return addMethod(func, false, true,  false)})
+export(function defSetter(func)       {return addMethod(func, false, false, true)})
+export(function defStaticGetter(func) {return addMethod(func, true,  true,  false)})
+export(function defStaticSetter(func) {return addMethod(func, true,  false, true)})
 
 //----------------------------------------------------------------------------
 // return a super invoker
 //----------------------------------------------------------------------------
-defScooj(function defSuper(args) {
+export(function defSuper() {
     var klass = ensureClassCurrentlyDefined()
 
     return getSuperMethod(klass)
 })
-        
 
 //----------------------------------------------------------------------------
-// scooj.installGlobals()
+// install scooj functions as globals
 //----------------------------------------------------------------------------
-defScooj(function installGlobals() {
+export(function installGlobals() {
     var globalNames = [
-        "defPackage",
         "defClass",
-        "defSuperclass",
         "defMethod",
         "defStaticMethod",
         "defGetter",
@@ -162,9 +115,13 @@ defScooj(function installGlobals() {
         "defSuper"
     ]
     
+    if (!scooj._global) {
+        throw new Error("unable to determine global object")
+    }
+
     for (var i=0; i<globalNames.length; i++) {
         var name = globalNames[i]
-        var func = scooj[name]
+        var func = module.exports[name]
         
         scooj._global[name] = func
     }
@@ -176,36 +133,19 @@ defScooj(function installGlobals() {
 //============================================================================
 
 //----------------------------------------------------------------------------
-// define a function globally
-//----------------------------------------------------------------------------
-function defineGlobalFunction(func) {
-    var packageName = func._scooj.packageName
-    
-    if (null == packageName) {
-        scooj._global[func.name] = func
-        return
-    }
-    
-    var lastContainer = scooj._global
-    var pieces = packageName.split(".")
-    for (var i=0; i<pieces.length; i++) {
-        var piece = pieces[i]
-        if (!lastContainer[piece]) lastContainer[piece] = {}
-        lastContainer = lastContainer[piece]
-    }
-    
-    lastContainer[func.name] = func
-}
-
-//----------------------------------------------------------------------------
 // return a new $super method
 //----------------------------------------------------------------------------
 function getSuperMethod(owningClass) {
     var superclass = owningClass._scooj.superclass
-    
+
     return function $super(thisp, methodName) {
-        var superFunc = superclass.prototype[methodName]
-        if (!superFunc) superFunc = superclass
+        var superFunc
+        if (methodName == null) {
+            superFunc = superclass
+        }
+        else {
+            superFunc = superclass.prototype[methodName]
+        }
 
         return superFunc.apply(thisp, Array.prototype.splice.call(arguments, 2))
     }
@@ -246,10 +186,10 @@ function addMethod(func, isStatic, isGetter, isSetter) {
     
     func._scooj = {}
     func._scooj.owningClass = klass
-    func._scooj.isMethod = true
-    func._scooj.isStatic = isStatic
-    func._scooj.isGetter = isGetter
-    func._scooj.isSetter = isSetter
+    func._scooj.isMethod    = true
+    func._scooj.isStatic    = isStatic
+    func._scooj.isGetter    = isGetter
+    func._scooj.isSetter    = isSetter
     
     methodContainer[func.name] = func
     
@@ -270,6 +210,8 @@ function addMethod(func, isStatic, isGetter, isSetter) {
     	else 
     		klass.prototype[func.name] = func
     }
+    
+    return func
 }
 
 //----------------------------------------------------------------------------
@@ -306,23 +248,39 @@ function ensureClassCurrentlyDefined() {
 }
 
 //----------------------------------------------------------------------------
-// return full class name
+// export a function
 //----------------------------------------------------------------------------
-function getFullClassName(packageName, className) {
-    if (null == packageName) packageName = scooj._currentPackage
+function export(func) {
+    ensureNamedFunction(func)
     
-    if (null == packageName) return className
-    
-    return packageName + "." + className
+    exports[func.name] = func
 }
 
-
 //----------------------------------------------------------------------------
-// debug logger
+// 
 //----------------------------------------------------------------------------
-function debugLog(message) {
-    if (!scooj.debug) return
-    console.log(message)
+function getName(o) {
+    if (!o) return "null"
+    o = o.name
+    if (!o) return "null"
+    return o
 }
 
-})()
+//----------------------------------------------------------------------------
+// get the "global" object
+//----------------------------------------------------------------------------
+function getGlobalObject() {
+    var globalObject = null
+
+    // running in a browser?
+    if (typeof window != "undefined") {
+        globalObject = window
+    }
+
+    // running in node.js?
+    else if (typeof global != "undefined") {
+        globalObject = global
+    }
+
+    return globalObject
+}

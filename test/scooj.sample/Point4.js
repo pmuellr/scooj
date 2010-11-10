@@ -4,13 +4,9 @@
 // http://www.opensource.org/licenses/mit-license.php
 //-----------------------------------------------------------------------------
 
-(function() {
-
+var Point3 = require("./Point3").$
 //----------------------------------------------------------------------------
-defPackage("scooj.sample")
-
-//----------------------------------------------------------------------------
-defClass(scooj.sample.Point3, function Point4(properties) {
+defClass(module, Point3, function Point4(properties) {
     $super(this, null, properties)
 })
 
@@ -32,6 +28,3 @@ defMethod(function add(aPoint) {
 defMethod(function toString() {
     return $super(this, "toString")
 })
-
-//-------------------------------------------------------------------
-})()
