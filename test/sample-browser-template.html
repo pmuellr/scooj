@@ -10,19 +10,20 @@
 <head>
 <title>scooj sample - points</title>
 
-<script src="../../scooj.js"></script>
 <script>
-scooj.debug = true
-scooj.installGlobals()
 </script>
 
-<script src="../scooj.test/TestRunner.js"></script>
-<script src="../scooj.test/TestSuite.js"></script>
+<script src="__MODJEWEL__/modjewel-require.js"></script>
 
-<script src="Point2.js"></script>
-<script src="Point3.js"></script>
-<script src="Point4.js"></script>
-<script src="PointTests.js"></script>
+<script src="scooj.transportd.js"></script>
+
+<script src="test/test/TestRunner.transportd.js"></script>
+<script src="test/test/TestSuite.transportd.js"></script>
+
+<script src="test/sample/Point2.transportd.js"></script>
+<script src="test/sample/Point3.transportd.js"></script>
+<script src="test/sample/Point4.transportd.js"></script>
+<script src="test/sample/PointTests.transportd.js"></script>
 
 <style>
 div.test-messages-section {
@@ -56,16 +57,19 @@ ul.test-messages li.test-message-none { background-color: inherit; }
 <script>
 
 //----------------------------------------------------------------------------
-var TestRunner = require("../testRunner/TestRunner").cls
-var PointTests = require("./PointTests").cls
+var scooj = require("scooj")
+scooj.installGlobals()
+
+var TestRunner = require("test/test/TestRunner")
+var PointTests = require("test/sample/PointTests")
 
 var testRunner = new TestRunner()
-testRunner.addTestSuite(new PointTests());
+testRunner.addTestSuite(PointTests)
 var results = testRunner.run();
 
-var html = scooj.test.TestRunner.resultsAsHTML(results);
+var html = TestRunner.resultsAsHTML(results)
 
-document.getElementById("test-results").innerHTML = html;
+document.getElementById("test-results").innerHTML = html
 </script>
 
 </body>

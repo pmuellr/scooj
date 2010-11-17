@@ -1,13 +1,14 @@
+
 //-----------------------------------------------------------------------------
 // Copyright (c) 2010 Patrick Mueller
 // Licensed under the MIT license: 
 // http://www.opensource.org/licenses/mit-license.php
 //-----------------------------------------------------------------------------
 
-var TestSuite = require("../testRunner/TestSuite").$
-var Point2    = require("./Point2").$
-var Point3    = require("./Point3").$
-var Point4    = require("./Point4").$
+var TestSuite = require("../test/TestSuite")
+var Point2    = require("./Point2")
+var Point3    = require("./Point3")
+var Point4    = require("./Point4")
 
 //----------------------------------------------------------------------------
 defClass(module, TestSuite, function PointTests(){

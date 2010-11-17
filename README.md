@@ -5,68 +5,86 @@ Despite the ongoing hate for the "pseudo-classical" object oriented
 class definition style in JavaScript from all the kewl kids, one of my
 thoughts is that JavaScript actual needs some order brought to it, for
 today's JavaScript mega-programs.  Because there is no order, and
-programs become as maintainable as BASICA programs of yore. It's the
-wild west.  Classical OO brings some order.  This is an experiment.
+programs become as maintainable as BASICA programs of yore. CommonJS
+modules help some - they can help you keep your large chunks of code
+better organized.  But I yearn for classic OO.  This is an experiment.
 
-**`scooj`** is currently targeted to browser JavaScript, as compared to
-CommonJS-y, module-y JavaScript.  When I finally implement or find a nice
-small require() system for browser JavaScript, I'll write a version of
-**`scooj`** which is module-friendly.
+scooj is designed to run in a CommonJS module system.  If you need
+one for a browser, look at 
+[modjewel](https://github.com/pmuellr/modjewel). 
 
-**`scooj`** is a JavaScript library that let's you define "classes" that have
+scooj is a JavaScript library that let's you define "classes" that have
 instance methods and static methods.  Classes can have superclasses, and
-a real super method invocation is available.
+a real super method invocation is available, though it's still kinda clunky.
 
-See the
-[examples](http://pmuellr.github.com/scooj/test/scooj.sample/sample.html) 
-for some basic use cases.
+See the included tests for some basic use cases.
 
 Usage
 -------------------------------------------------------------------------------
 
-Add a link to **`scooj.js`** to your HTML file.
+        var scooj = require("scooj") // or wherever you load it from
 
-**`scooj`** defines all of it's functions in the "**`scooj`**" global 
-variable.  You can use the function **`scooj.installGlobals()`** to have
-some of the functions defined globally as well.
+To keep your code a little cleaner, you can install the most useful functions
+in scooj as global functions.  This works at least with node.js and modjewel.
+
+Installing the scooj functions as globals is done by:
+
+        scooj.installGlobals()
+    
+I suppose that's evil, but if you're working in a closed system, it makes life
+easier.
 
 Functions defined
 -------------------------------------------------------------------------------
 
-**`scooj.defPackage(packageName)`**
+Note that all the functions passed to scooj functions should be named; this
+is how the features are actually named, and it makes debugging nice because
+you're functions will no longer be anonymous.
 
-Defines a new package.  All classes added after this function is
-executed will be added to this package.  The package defines the
-global name the classes will be available in.
+**scooj.defClass(module, [superclass,] constructorFunction)**
 
-**`scooj.defClass([superclass,] constructorFunction)`**
+Defines a new class.  If subclassing an existing class, specify that
+class as the second parameter.  The constructorFunction will be the
+constructor for the class.  The module parameter is the current CommonJS
+module.
 
-Defines a new function.  If subclassing an existing class, specify that
-class as the first parameter.  The constructorFunction will be the
-constructor for the class.
-
-All methods added after this function is executed will be added to this
+All functions executed after this function is executed will be added to this
 class.
 
-**`scooj.defStaticMethod(methodFunction)`**
+**scooj.defStaticMethod(methodFunction)**
 
 Define a static method on the current class.
 
-**`scooj.defMethod(methodFunction)`**
+**scooj.defMethod(methodFunction)**
 
 Define an instance method on the current class.
 
-**`scooj.defSuper()`**
+**scooj.defSuper()**
 
 Returns a function which performs super invocation.  The super
 function should be invoked with the following parameters:
-the receiver (should be `this`), the method name to
-be invoked, and then any parameters to be passed to the method.
 
-**`scooj.installGlobals()`**
+* the receiver (should be `this`) 
+* the method name to be invoked 
+* any parameters to be passed to the method
 
-Makes all of the **`scooj.def*()`** functions available globally, instead
-of just as properties of the **`scooj`** object.
+To make a super call on a constructor, pass null as the method name.
+
+Example
+-------------------------------------------------------------------------------
+
+The file [animals.js](test/animals.js) contains a translation of the
+[OO CoffeeScript example](http://jashkenas.github.com/coffee-script/#classes).
+
+In scooj's defense:
+
+* you wouldn't normally be defining more than one class in a file
+* you wouldn't be using super so much
+* you likely would never have to reference your own class directly, and
+  thus not need the assignment of the **defClass()** invocation.
+
+The file [PointTests.js](test/sample/PointTests.js) is more the flavor I write
+in.
 
 Copyright / License
 -------------------------------------------------------------------------------

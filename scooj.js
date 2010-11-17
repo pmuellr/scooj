@@ -1,3 +1,4 @@
+
 //-----------------------------------------------------------------------------
 // Copyright (c) 2010 Patrick Mueller
 // Licensed under the MIT license: 
@@ -72,11 +73,7 @@ export(function defClass(module, superclass, func) {
         func.prototype.constructor = func
     }
 
-    module.exports[func.name] = func
-    
-    if (typeof module.exports.$ == "undefined") {
-        module.exports.$      = func
-    }
+    module.exports = func
     
     return func
 })
