@@ -73,7 +73,7 @@ To make a super call on a constructor, pass null as the method name.
 Example
 -------------------------------------------------------------------------------
 
-The file [animals.js](test/animals.js) contains a translation of the
+The file [animals.js](./test/animals.js) contains a translation of the
 [OO CoffeeScript example](http://jashkenas.github.com/coffee-script/#classes).
 
 In scooj's defense:
@@ -83,7 +83,7 @@ In scooj's defense:
 * you likely would never have to reference your own class directly, and
   thus not need the assignment of the **defClass()** invocation.
 
-The file [PointTests.js](test/sample/PointTests.js) is more the flavor I write
+The file [PointTests.js](./test/sample/PointTests.js) is more the flavor I write
 in.
 
 Copyright / License
