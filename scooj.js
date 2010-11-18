@@ -72,8 +72,10 @@ export(function defClass(module, superclass, func) {
         func.prototype = new T()
         func.prototype.constructor = func
     }
+    
+    func.$super = getSuperMethod(func)
 
-    module.exports = func
+    if (typeof(module.exports) != "function") module.exports = func
     
     return func
 })
