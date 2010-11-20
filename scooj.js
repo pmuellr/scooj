@@ -16,7 +16,7 @@ if (typeof exports == "undefined") {
 // hidden globals
 //----------------------------------------------------------------------------
 var scooj = {}
-
+scooj.version         = "0.2.0"
 scooj._global         = getGlobalObject()
 scooj._classes        = {}
 scooj._currentClass   = null
