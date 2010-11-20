@@ -1,6 +1,8 @@
 #!/bin/sh
 cd `dirname $0`
 
+node test-driver.js
+
 if [ -z $MODJEWEL ]; then
     echo "The MODJEWEL environment variable is not set."
     exit
@@ -21,12 +23,11 @@ if [ -d tmp ]; then
 fi
 
 mkdir tmp
+cp -R test tmp
+cp ../scooj.js tmp
 
-$MODJEWEL/module2transportd.py -o tmp .
-
-OLD=test/sample-browser-template.html
-NEW=tmp/sample-browser.html
-sed "s!__MODJEWEL__!../$MODJEWEL!" <$OLD >$NEW
+$MODJEWEL/module2transportd.py -o tmp --htmlFile testDriver.html --htmlMain "require('test-driver')" .
+cp $MODJEWEL/modjewel-require.js tmp
 
 echo
-echo to run the tests, open $NEW in your browser
+echo to run the tests, open tmp/testDriver.html in your browser

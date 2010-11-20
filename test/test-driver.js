@@ -1,9 +1,9 @@
 
-var scooj = require("./scooj")
+var scooj = require("../scooj")
 scooj.installGlobals()
 
-var TestRunner = require("./test/test/TestRunner")
-var PointTests = require("./test/sample/PointTests")
+var TestRunner = require("./test/TestRunner")
+var PointTests = require("./sample/PointTests")
 
 var testRunner = new TestRunner()
 testRunner.addTestSuite(PointTests)
