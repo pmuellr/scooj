@@ -30,3 +30,5 @@ defMethod(function add(aPoint) {
 defMethod(function toString() {
     return $super(this, "toString")
 })
+
+
