@@ -104,6 +104,7 @@ defMethod(function _runTest(suite, testName, results) {
         }
         else {
             results.errors.push(testTitle + " : error: " + e)
+            if (e.stack) console.log(e.stack)
         }
     }
     

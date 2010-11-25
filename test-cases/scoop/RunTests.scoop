@@ -6,13 +6,13 @@
 //-----------------------------------------------------------------------------
 
 require ../unit-test/TestSuite
-require ./Point2"
-require ./Point3"
-require ./Point4"
+require ./Point2
+require ./Point3
+require ./Point4
 
 //----------------------------------------------------------------------------
 class RunTests < TestSuite
-    super(this, null)
+    super()
 
 //----------------------------------------------------------------------------
 method setUp

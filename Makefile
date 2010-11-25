@@ -20,3 +20,9 @@ test:
 
 clean:
 	rm -rf tmp
+
+help:
+	@echo make targets available:
+	@echo \  all
+	@echo \  test
+	@echo \  clean

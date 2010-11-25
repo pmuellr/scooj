@@ -14,7 +14,7 @@ class Point2(properties)
     }
 
 //----------------------------------------------------------------------------
-method add(aPoint) {
+method add(aPoint)
     var result = new this.constructor(this)
     
     result.x += aPoint.x
