@@ -84,7 +84,7 @@ def compile(source, iFileName, path, baseName):
         nextDirective = paddedDirectives[index+1]
 
         directive.calculateBodyAndComments(lines, prevDirective, nextDirective)        
-            
+    
     firstDirective = True
     for directive in directives:
         directive.compile(firstDirective)
@@ -102,8 +102,8 @@ def compile(source, iFileName, path, baseName):
         if directive.isSuperReplaceable():
             body = replaceSuperInvocations(className, directive.getMethodName(), body)
         
-        if len(comments): comments = "%s\n" % comments
-        if len(body):     body     = "\n%s" % body
+        if len(directive.comments): comments = "%s\n" % comments
+        if len(directive.body):     body     = "\n%s" % body
         lines.append("%s%s%s" % (comments, line, body))
 
     return "\n".join(lines)        
