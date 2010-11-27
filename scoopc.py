@@ -2,8 +2,8 @@
 
 #-------------------------------------------------------------------------------
 # Copyright (c) 2010 Patrick Mueller
-# 
-# The MIT License - see: http://www.opensource.org/licenses/mit-license.php
+# Licensed under the MIT license: 
+# http://www.opensource.org/licenses/mit-license.php
 #-------------------------------------------------------------------------------
 
 import os
