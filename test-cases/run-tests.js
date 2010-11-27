@@ -28,3 +28,5 @@ TestRunner.resultsToConsole("RunTests", results)
 
 var animals = require("./scoop/Animals")
 
+require("./scoop/Etc").runTests()
+
