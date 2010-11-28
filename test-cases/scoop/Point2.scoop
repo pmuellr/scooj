@@ -5,28 +5,30 @@
 // http://www.opensource.org/licenses/mit-license.php
 //-----------------------------------------------------------------------------
 
-var Point3 = require("./Point3")
-
 //----------------------------------------------------------------------------
-defClass(module, Point3, function Point4(properties) {
-    $super(this, null, properties)
-})
-
-//----------------------------------------------------------------------------
-var $super = defSuper()
-
-//----------------------------------------------------------------------------
-defMethod(function add(aPoint) {
-    var result = $super(this, "add", aPoint)
+class Point2(properties) 
+    if (!properties) return
     
-    if (aPoint.a) {
-        result.a += aPoint.a
+    for (var key in properties) {
+        this[key] = properties[key]
     }
+
+//----------------------------------------------------------------------------
+method add(aPoint)
+    var result = new this.constructor(this)
+    
+    result.x += aPoint.x
+    result.y += aPoint.y
     
     return result
-})
 
 //----------------------------------------------------------------------------
-defMethod(function toString() {
-    return $super(this, "toString")
-})
+method  toString
+    var result = this.constructor.name + "{ "
+
+    result += "x:" + this.x + "; "
+    result += "y:" + this.y + "; "
+    
+    result += "}"
+    
+    return result

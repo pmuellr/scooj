@@ -1,0 +1,52 @@
+
+//-----------------------------------------------------------------------------
+// Copyright (c) 2010 Patrick Mueller
+// Licensed under the MIT license: 
+// http://www.opensource.org/licenses/mit-license.php
+//-----------------------------------------------------------------------------
+
+//----------------------------------------------------------------------------
+class Etc
+    this._a = "a"
+
+//----------------------------------------------------------------------------
+static
+    Etc._A = "A"
+
+//----------------------------------------------------------------------------
+static method runTests
+    if (Etc.A != "A") throw error("expecting Etc.A == 'A'")
+    Etc.A = "B"
+    if (Etc.A != "B") throw error("expecting Etc.A == 'B'")
+    
+    var etc = new Etc()
+    if (etc.a != "a") throw error("expecting etc.a == 'a'")
+    etc.a = "b"
+    if (etc.a != "b") throw error("expecting etc.a == 'b'")
+
+    log("Etc tests pass")    
+
+//----------------------------------------------------------------------------
+static getter A
+    return Etc._A
+
+//----------------------------------------------------------------------------
+static setter A (value)
+    return Etc._A = value
+
+//----------------------------------------------------------------------------
+getter a
+    return this._a
+
+//----------------------------------------------------------------------------
+setter a (value)
+    return this._a = value
+
+//----------------------------------------------------------------------------
+function log(message)
+    console.log(message)
+
+//----------------------------------------------------------------------------
+function error(message)
+    log(message)
+    throw new Error(message)

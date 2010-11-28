@@ -104,6 +104,7 @@ defMethod(function _runTest(suite, testName, results) {
         }
         else {
             results.errors.push(testTitle + " : error: " + e)
+            if (e.stack) console.log(e.stack)
         }
     }
     
@@ -113,7 +114,7 @@ defMethod(function _runTest(suite, testName, results) {
 })
 
 //-------------------------------------------------------------------
-defStaticMethod(function resultsAsHTML(results) {
+defStaticMethod(function resultsAsHTML(label, results) {
 
     function generateSection(html, title, type) {
         html.push("<div class='test-messages-section'>")
@@ -135,6 +136,11 @@ defStaticMethod(function resultsAsHTML(results) {
     
     var html = []
     
+    if (results.fails.length + results.errors.length == 0) {
+        html = label + ": all tests pass (" + results.passes.length + ")"
+        return
+    }
+    
     generateSection(html, "Passing  tests", "passes")
     generateSection(html, "Failing  tests", "fails")
     generateSection(html, "Erroring tests", "errors")
@@ -143,7 +149,7 @@ defStaticMethod(function resultsAsHTML(results) {
 })
 
 //-------------------------------------------------------------------
-defStaticMethod(function resultsToConsole(results) {
+defStaticMethod(function resultsToConsole(label, results) {
 
     function generateSection(title, type) {
         console.log(title)
@@ -158,6 +164,11 @@ defStaticMethod(function resultsToConsole(results) {
         
         console.log()
         
+    }
+    
+    if (results.fails.length + results.errors.length == 0) {
+        console.log(label + ": all tests pass (" + results.passes.length + ")")
+        return
     }
     
     generateSection("Passing  tests", "passes")
