@@ -73,7 +73,7 @@ To make a super call on a constructor, pass null as the method name.
 Example
 -------------------------------------------------------------------------------
 
-The file [Animals.js](./test-cases/scooj/Animals.js) contains a translation of the
+The file [Animals.js](scooj/blob/master/test-cases/scooj/Animals.js) contains a translation of the
 [OO CoffeeScript example](http://jashkenas.github.com/coffee-script/#classes).
 
 In scooj's defense:
@@ -83,7 +83,7 @@ In scooj's defense:
 * you likely would never have to reference your own class directly, and
   thus not need the assignment of the **defClass()** invocation.
 
-The file [RunTests.js](./test-cases/scooj/RunTests.js) is more the flavor I write
+The file [RunTests.js](scooj/blob/master/test-cases/scooj/RunTests.js) is more the flavor I write
 in.
 
 scoopc.py - scooj compiler
@@ -97,7 +97,7 @@ scoopc is designed to fix that.  It's a "compiler" which takes files consisting
 of JavaScript code prefixed with "directive lines", and generates new 
 JavaScript files.  The "directive lines" are lines in the file which are used
 to declare methods, classes, etc.  See the file 
-[Animals.scoop](./test-cases/scoop/Animals.scoop) for an example of a
+[Animals.scoop](scooj/blob/master/test-cases/scoop/Animals.scoop) for an example of a
 .scoop file.
 
 Generally, directives are used to define functions.  You specify the
