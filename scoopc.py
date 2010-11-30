@@ -12,11 +12,10 @@ import sys
 import optparse
 
 PROGRAM = os.path.basename(sys.argv[0])
-VERSION = "0.4.0"
+VERSION = "1.0.0"
 
 ExtensionScoop      = ".scoop"
 ExtensionJavaScript = ".js"
-ExtensionTransportD = ".transportd.%s" % ExtensionJavaScript
 
 Options = None
 
@@ -52,6 +51,10 @@ def processFile(iFileName, path=""):
 
     contents = compile(contents, iFileName, path, baseName)
     
+    oDir = os.path.dirname(oFileName)
+    if not os.path.exists(oDir):
+        os.makedirs(oDir)
+        
     with open(oFileName, "w") as oFile:
         oFile.write(contents)
     
@@ -560,10 +563,6 @@ def parseArgs():
     
     parser.add_option("-o", "--out", dest="dirName", metavar="DIR", default=".",
         help="generate .js files in DIR (default: %default)"
-    )
-    
-    parser.add_option("-t", "--transportD", dest="transportD", action="store_true", default=False,
-        help="generate Transport/D compatible module files"
     )
     
     parser.add_option("-q", "--quiet", dest="quiet", action="store_true", default=False,
