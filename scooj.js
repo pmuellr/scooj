@@ -16,7 +16,7 @@ if (typeof exports == "undefined") {
 // hidden globals
 //----------------------------------------------------------------------------
 var scooj = {}
-scooj.version         = "0.2.0"
+scooj.version         = "1.0.1"
 scooj._global         = getGlobalObject()
 scooj._classes        = {}
 scooj._currentClass   = null
@@ -81,6 +81,13 @@ export(function defClass(module, superclass, func) {
 })
 
 //----------------------------------------------------------------------------
+// 
+//----------------------------------------------------------------------------
+export(function endClass() {
+    scooj._currentClass = null
+})
+
+//----------------------------------------------------------------------------
 // method/accessor definers
 //----------------------------------------------------------------------------
 export(function defMethod(func)       {return addMethod(func, false, false, false)})
@@ -102,6 +109,8 @@ export(function defSuper() {
 //----------------------------------------------------------------------------
 // install scooj functions as globals
 //----------------------------------------------------------------------------
+var globalsInstalled = false
+
 export(function installGlobals() {
     var globalNames = [
         "defClass",
@@ -111,8 +120,12 @@ export(function installGlobals() {
         "defSetter",
         "defStaticGetter",
         "defStaticSetter",
-        "defSuper"
+        "defSuper",
+        "endClass",
     ]
+
+    if (globalsInstalled) return
+    globalsInstalled = true
     
     if (!scooj._global) {
         throw new Error("unable to determine global object")

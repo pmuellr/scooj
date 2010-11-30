@@ -5,6 +5,8 @@
 // http://www.opensource.org/licenses/mit-license.php
 //-----------------------------------------------------------------------------
 
+require("scooj").installGlobals()
+
 //-------------------------------------------------------------------
 defClass(module, function TestRunner() {
     this.suites = []

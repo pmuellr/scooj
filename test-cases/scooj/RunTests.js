@@ -5,6 +5,8 @@
 // http://www.opensource.org/licenses/mit-license.php
 //-----------------------------------------------------------------------------
 
+require("scooj").installGlobals()
+
 var TestSuite = require("../unit-test/TestSuite")
 var Point2    = require("./Point2")
 var Point3    = require("./Point3")

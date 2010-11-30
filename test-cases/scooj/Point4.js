@@ -5,6 +5,8 @@
 // http://www.opensource.org/licenses/mit-license.php
 //-----------------------------------------------------------------------------
 
+require("scooj").installGlobals()
+
 var Point3 = require("./Point3")
 
 //----------------------------------------------------------------------------

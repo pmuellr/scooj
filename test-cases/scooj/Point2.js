@@ -5,6 +5,8 @@
 // http://www.opensource.org/licenses/mit-license.php
 //-----------------------------------------------------------------------------
 
+require("scooj").installGlobals()
+
 //----------------------------------------------------------------------------
 defClass(module, function Point2(properties) {
     if (!properties) return

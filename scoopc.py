@@ -12,7 +12,7 @@ import sys
 import optparse
 
 PROGRAM = os.path.basename(sys.argv[0])
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 ExtensionScoop      = ".scoop"
 ExtensionJavaScript = ".js"
@@ -20,7 +20,7 @@ ExtensionJavaScript = ".js"
 Options = None
 
 #-------------------------------------------------------------------------------
-#
+# main program
 #-------------------------------------------------------------------------------
 def main(): 
     global Options
@@ -29,10 +29,12 @@ def main():
 
     Options = options    
     
+    # make sure files exist
     for iFileName in iFileNames:
         if not os.path.exists(iFileName):
             error("file does not exist: '%s'" % iFileName)
-            
+         
+    # for each file/path, process it
     for iFileName in iFileNames:
         if os.path.isdir(iFileName):
             processDir(iFileName)
@@ -40,34 +42,62 @@ def main():
             processFile(iFileName)
 
 #-------------------------------------------------------------------------------
-#
+# process a file
 #-------------------------------------------------------------------------------
 def processFile(iFileName, path=""):
     baseName = os.path.basename(iFileName)[:-6]
     oFileName = os.path.join(Options.dirName, path, baseName) + ".js"
     
+    # read the file
     with open(iFileName) as iFile:
         contents = iFile.read()
 
+    # compile the contents
     contents = compile(contents, iFileName, path, baseName)
     
+    # create output directory
     oDir = os.path.dirname(oFileName)
     if not os.path.exists(oDir):
         os.makedirs(oDir)
         
+    # write output file
     with open(oFileName, "w") as oFile:
         oFile.write(contents)
     
     log("generated module %s/%s in %s" % (path, baseName, oFileName))
 
 #-------------------------------------------------------------------------------
-#
+# process a directory
+#-------------------------------------------------------------------------------
+def processDir(iDirName, path=""):
+    verbose("processDir:  %s path: %s" % (iDirName, path))
+
+    # get entries in directory
+    for entry in os.listdir(iDirName):
+        fullName = os.path.join(iDirName, entry)
+        
+        # recursively process subdirectories
+        if os.path.isdir(fullName):
+            if not entry.startswith("."):
+                processDir(fullName, os.path.join(path, entry))
+            continue
+        
+        # if it's a scoop file, process it
+        if entry.endswith(ExtensionScoop):
+            processFile(fullName, path)
+
+#-------------------------------------------------------------------------------
+# compile a scoop file
 #-------------------------------------------------------------------------------
 def compile(source, iFileName, path, baseName):
+
+    # split file into lines
     lines = source.split("\n")
-    
+
+    # initialize directive list    
     directives = []
     
+    # get the directives from the lines
     patternDirective = re.compile(r"^[\w\$\._@]+")
     for lineNo, line in enumerate(lines):
         if patternDirective.match(line):
@@ -77,25 +107,38 @@ def compile(source, iFileName, path, baseName):
             
             directives.append(directive)
             
-    paddedDirectives      = [None, None]
-    paddedDirectives[1:1] = directives
+    # calculate the body and comments for the directives
+    prevDirective = None
+    for index, directive in enumerate(directives):
     
-    for index, directive in enumerate(paddedDirectives):
-        if None == directive: continue
-        
-        prevDirective = paddedDirectives[index-1]
-        nextDirective = paddedDirectives[index+1]
+        nextDirective = None
+        if index != len(directives) - 1: 
+            nextDirective = directives[index+1]
 
         directive.calculateBodyAndComments(lines, prevDirective, nextDirective)        
+        
+        prevDirective = directive
     
+    # compile the directives
     firstDirective = True
+    lastDirective  = None
     for directive in directives:
         directive.compile()
         
         if firstDirective:
-            directive.line = "var scooj = require('scooj'); %s" % directive.line
             firstDirective = False
+            directive.line = ";var scooj = require('scooj'); %s" % directive.line
+        else:
+            directive.line = "%s%s" % (lastDirective.endingSuffix(), directive.line)
+            
+        lastDirective = directive
         
+    if lastDirective:
+        suffix = lastDirective.endingSuffix()
+        if suffix == "": suffix = ";"
+        lastDirective.body.append("%sscooj.endClass();" % suffix)    
+        
+    # generate the output
     lines = []
     className = "???"
     for directive in directives:
@@ -103,6 +146,7 @@ def compile(source, iFileName, path, baseName):
         body     = "\n".join(directive.body)
         line     = directive.line
         
+        # replace super invocations
         if directive.getClassName(): className = directive.getClassName()
         
         if directive.isSuperReplaceable():
@@ -112,27 +156,11 @@ def compile(source, iFileName, path, baseName):
         if len(directive.body):     body     = "\n%s" % body
         lines.append("%s%s%s" % (comments, line, body))
 
+    # return the compiled content
     return "\n".join(lines)        
 
 #-------------------------------------------------------------------------------
-#
-#-------------------------------------------------------------------------------
-def processDir(iDirName, path=""):
-    verbose("processDir:  %s path: %s" % (iDirName, path))
-
-    for entry in os.listdir(iDirName):
-        fullName = os.path.join(iDirName, entry)
-        
-        if os.path.isdir(fullName):
-            if not entry.startswith("."):
-                processDir(fullName, os.path.join(path, entry))
-            continue
-        
-        if entry.endswith(ExtensionScoop):
-            processFile(fullName, path)
-
-#-------------------------------------------------------------------------------
-#
+# replace super method invocations
 #-------------------------------------------------------------------------------
 def replaceSuperInvocations(className, methodName, methodBody):
     pattern1 = re.compile(r"([^\w\$])super\(\s*\)")
@@ -153,7 +181,7 @@ def replaceSuperInvocations(className, methodName, methodBody):
     return methodBody
 
 #-------------------------------------------------------------------------------
-#
+# base directive
 #-------------------------------------------------------------------------------
 class Directive:
     
@@ -170,6 +198,11 @@ class Directive:
         return None
     
     #---------------------------------------------------------------------------
+    @classmethod
+    def match(cls, line):
+        return cls.matchPattern.match(line)
+        
+    #---------------------------------------------------------------------------
     def __init__(self, line, lineNo, match):
         self.line     = line
         self.lineNo   = lineNo
@@ -182,8 +215,8 @@ class Directive:
         raise Exception("subclass responsibility")
 
     #---------------------------------------------------------------------------
-    def firstDirectivePrefix(self):
-        return "var scooj = require('scooj'); "
+    def endingSuffix(self):
+        return ""
 
     #---------------------------------------------------------------------------
     def calculateBodyAndComments(self, lines, prevDirective, nextDirective):
@@ -198,25 +231,19 @@ class Directive:
             return
             
         self.body = lines[self.lineNo + 1 : nextDirective.lineNo - 1]
-        
+
     #---------------------------------------------------------------------------
-    def getClassName(self):  return None
-    def getMethodName(self): return None
-    
+    def getClassName(self):       return None
+    def getMethodName(self):      return None
     def isSuperReplaceable(self): return False
-        
 
 #-------------------------------------------------------------------------------
 #
 #-------------------------------------------------------------------------------
 class DirectiveClass(Directive):
 
-    #---------------------------------------------------------------------------
-    @staticmethod
-    def match(line):
-        matchPattern = re.compile("^class\s+([\w$_]+)\s*(\(.*\))?\s*(<\s*([\w$_]+))?\s*$")
-        return matchPattern.match(line)
-    
+    matchPattern = re.compile("^class\s+([\w$_]+)\s*(\(.*\))?\s*(<\s*([\w$_]+))?\s*$")
+
     #---------------------------------------------------------------------------
     def __init__(self, line, lineNo, match):
         Directive.__init__(self, line, lineNo, match)
@@ -238,17 +265,13 @@ class DirectiveClass(Directive):
 
         self.line = "var %s = scooj.defClass(module, %sfunction %s%s {" 
         self.line = self.line % (className, superclassText, className, methodParms)
-        
-        if 0 == len(self.body):
-            self.body += "});"
-        
-        else:
-            self.body[len(self.body)-1] = self.body[len(self.body)-1] + "});"
             
     #---------------------------------------------------------------------------
-    def getClassName(self):  return self.className
-    def getMethodName(self): return None
-    
+    def endingSuffix(self):
+        return "}); "
+
+    #---------------------------------------------------------------------------
+    def getClassName(self):       return self.className
     def isSuperReplaceable(self): return True
         
 #-------------------------------------------------------------------------------
@@ -256,12 +279,8 @@ class DirectiveClass(Directive):
 #-------------------------------------------------------------------------------
 class DirectiveStaticMethod(Directive):
 
-    #---------------------------------------------------------------------------
-    @staticmethod
-    def match(line):
-        matchPattern = re.compile("^static\s+method\s+([\w$_]+)\s*(\(.*\))?\s*$")
-        return matchPattern.match(line)
-    
+    matchPattern = re.compile("^static\s+method\s+([\w$_]+)\s*(\(.*\))?\s*$")
+
     #---------------------------------------------------------------------------
     def __init__(self, line, lineNo, match):
         Directive.__init__(self, line, lineNo, match)
@@ -278,11 +297,9 @@ class DirectiveStaticMethod(Directive):
         self.line = "scooj.defStaticMethod(function %s%s {" 
         self.line = self.line % (methodName, methodParms)
             
-        if 0 == len(self.body):
-            self.body += "});"
-        
-        else:
-            self.body[len(self.body)-1] = self.body[len(self.body)-1] + "});"
+    #---------------------------------------------------------------------------
+    def endingSuffix(self):
+        return "}); "
 
     #---------------------------------------------------------------------------
     def getMethodName(self):  return self.methodName
@@ -292,11 +309,7 @@ class DirectiveStaticMethod(Directive):
 #-------------------------------------------------------------------------------
 class DirectiveStaticGetter(Directive):
 
-    #---------------------------------------------------------------------------
-    @staticmethod
-    def match(line):
-        matchPattern = re.compile("^static\s+getter\s+([\w$_]+)\s*$")
-        return matchPattern.match(line)
+    matchPattern = re.compile("^static\s+getter\s+([\w$_]+)\s*$")
     
     #---------------------------------------------------------------------------
     def __init__(self, line, lineNo, match):
@@ -311,11 +324,9 @@ class DirectiveStaticGetter(Directive):
         self.line = "scooj.defStaticGetter(function %s() {" 
         self.line = self.line % (methodName)
             
-        if 0 == len(self.body):
-            self.body += "});"
-        
-        else:
-            self.body[len(self.body)-1] = self.body[len(self.body)-1] + "});"
+    #---------------------------------------------------------------------------
+    def endingSuffix(self):
+        return "}); "
 
     #---------------------------------------------------------------------------
     def getMethodName(self):  return self.methodName
@@ -325,12 +336,8 @@ class DirectiveStaticGetter(Directive):
 #-------------------------------------------------------------------------------
 class DirectiveStaticSetter(Directive):
 
-    #---------------------------------------------------------------------------
-    @staticmethod
-    def match(line):
-        matchPattern = re.compile("^static\s+setter\s+([\w$_]+)\s*(\(.*\))\s*$")
-        return matchPattern.match(line)
-    
+    matchPattern = re.compile("^static\s+setter\s+([\w$_]+)\s*(\(.*\))\s*$")
+
     #---------------------------------------------------------------------------
     def __init__(self, line, lineNo, match):
         Directive.__init__(self, line, lineNo, match)
@@ -345,11 +352,9 @@ class DirectiveStaticSetter(Directive):
         self.line = "scooj.defStaticSetter(function %s%s {" 
         self.line = self.line % (methodName, methodParms)
             
-        if 0 == len(self.body):
-            self.body += "});"
-        
-        else:
-            self.body[len(self.body)-1] = self.body[len(self.body)-1] + "});"
+    #---------------------------------------------------------------------------
+    def endingSuffix(self):
+        return "}); "
 
     #---------------------------------------------------------------------------
     def getMethodName(self):  return self.methodName
@@ -359,12 +364,8 @@ class DirectiveStaticSetter(Directive):
 #-------------------------------------------------------------------------------
 class DirectiveMethod(Directive):
 
-    #---------------------------------------------------------------------------
-    @staticmethod
-    def match(line):
-        matchPattern = re.compile("^method\s+([\w$_]+)\s*(\(.*\))?\s*$")
-        return matchPattern.match(line)
-    
+    matchPattern = re.compile("^method\s+([\w$_]+)\s*(\(.*\))?\s*$")
+
     #---------------------------------------------------------------------------
     def __init__(self, line, lineNo, match):
         Directive.__init__(self, line, lineNo, match)
@@ -381,15 +382,12 @@ class DirectiveMethod(Directive):
         self.line = "scooj.defMethod(function %s%s {" 
         self.line = self.line % (methodName, methodParms)
             
-        if 0 == len(self.body):
-            self.body += "});"
-        
-        else:
-            self.body[len(self.body)-1] = self.body[len(self.body)-1] + "});"
+    #---------------------------------------------------------------------------
+    def endingSuffix(self):
+        return "}); "
 
     #---------------------------------------------------------------------------
-    def getMethodName(self):  return self.methodName
-    
+    def getMethodName(self):      return self.methodName
     def isSuperReplaceable(self): return True
         
 #-------------------------------------------------------------------------------
@@ -397,12 +395,8 @@ class DirectiveMethod(Directive):
 #-------------------------------------------------------------------------------
 class DirectiveGetter(Directive):
 
-    #---------------------------------------------------------------------------
-    @staticmethod
-    def match(line):
-        matchPattern = re.compile("^getter\s+([\w$_]+)\s*$")
-        return matchPattern.match(line)
-    
+    matchPattern = re.compile("^getter\s+([\w$_]+)\s*$")
+
     #---------------------------------------------------------------------------
     def __init__(self, line, lineNo, match):
         Directive.__init__(self, line, lineNo, match)
@@ -416,25 +410,20 @@ class DirectiveGetter(Directive):
         self.line = "scooj.defGetter(function %s() {" 
         self.line = self.line % (methodName)
             
-        if 0 == len(self.body):
-            self.body += "});"
-        
-        else:
-            self.body[len(self.body)-1] = self.body[len(self.body)-1] + "});"
+    #---------------------------------------------------------------------------
+    def endingSuffix(self):
+        return "}); "
 
     #---------------------------------------------------------------------------
-    def getMethodName(self):  return self.methodName
+    def getMethodName(self):      return self.methodName
+    def isSuperReplaceable(self): return True
         
 #-------------------------------------------------------------------------------
 #
 #-------------------------------------------------------------------------------
 class DirectiveSetter(Directive):
 
-    #---------------------------------------------------------------------------
-    @staticmethod
-    def match(line):
-        matchPattern = re.compile("^setter\s+([\w$_]+)\s*(\(.*\))\s*$")
-        return matchPattern.match(line)
+    matchPattern = re.compile("^setter\s+([\w$_]+)\s*(\(.*\))\s*$")
     
     #---------------------------------------------------------------------------
     def __init__(self, line, lineNo, match):
@@ -450,27 +439,21 @@ class DirectiveSetter(Directive):
         self.line = "scooj.defSetter(function %s%s {" 
         self.line = self.line % (methodName, methodParms)
             
-        if 0 == len(self.body):
-            self.body += "});"
-        
-        else:
-            self.body[len(self.body)-1] = self.body[len(self.body)-1] + "});"
+    #---------------------------------------------------------------------------
+    def endingSuffix(self):
+        return "}); "
 
     #---------------------------------------------------------------------------
-    def getMethodName(self):  return self.methodName
-        
+    def getMethodName(self):      return self.methodName
+    def isSuperReplaceable(self): return True
         
 #-------------------------------------------------------------------------------
 #
 #-------------------------------------------------------------------------------
 class DirectiveFunction(Directive):
 
-    #---------------------------------------------------------------------------
-    @staticmethod
-    def match(line):
-        matchPattern = re.compile("^function\s+([\w$_]+)\s*(\(.*\))?\s*$")
-        return matchPattern.match(line)
-    
+    matchPattern = re.compile("^function\s+([\w$_]+)\s*(\(.*\))?\s*$")
+
     #---------------------------------------------------------------------------
     def __init__(self, line, lineNo, match):
         Directive.__init__(self, line, lineNo, match)
@@ -485,23 +468,16 @@ class DirectiveFunction(Directive):
         self.line = "var %s = function %s%s {" 
         self.line = self.line % (functionName, functionName, functionParms)
             
-        if 0 == len(self.body):
-            self.body += "};"
-        
-        else:
-            self.body[len(self.body)-1] = self.body[len(self.body)-1] + "};"
-            
+    #---------------------------------------------------------------------------
+    def endingSuffix(self):
+        return "}; "
         
 #-------------------------------------------------------------------------------
 #
 #-------------------------------------------------------------------------------
 class DirectiveStatic(Directive):
 
-    #---------------------------------------------------------------------------
-    @staticmethod
-    def match(line):
-        matchPattern = re.compile("^static\s*$")
-        return matchPattern.match(line)
+    matchPattern = re.compile("^static\s*$")
     
     #---------------------------------------------------------------------------
     def __init__(self, line, lineNo, match):
@@ -509,18 +485,14 @@ class DirectiveStatic(Directive):
 
     #---------------------------------------------------------------------------
     def compile(self):
-        self.line = ""
+        self.line = "// static code run on first require()"
 
 #-------------------------------------------------------------------------------
 #
 #-------------------------------------------------------------------------------
 class DirectiveRequire(Directive):
 
-    #---------------------------------------------------------------------------
-    @staticmethod
-    def match(line):
-        matchPattern = re.compile("^require\s+([\w$\.\-/]+)(\s+as\s+([\w$.-]+))?\s*$")
-        return matchPattern.match(line)
+    matchPattern = re.compile("^require\s+([\w$\.\-/]+)(\s+as\s+([\w$.-]+))?\s*$")
     
     #---------------------------------------------------------------------------
     def __init__(self, line, lineNo, match):
