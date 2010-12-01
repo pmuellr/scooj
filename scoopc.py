@@ -242,7 +242,7 @@ class Directive:
 #-------------------------------------------------------------------------------
 class DirectiveClass(Directive):
 
-    matchPattern = re.compile("^class\s+([\w$_]+)\s*(\(.*\))?\s*(<\s*([\w$_]+))?\s*$")
+    matchPattern = re.compile("^class\s+([\w$_]+)\s*(\(.*\))?\s*(<\s*(\S+))?\s*$")
 
     #---------------------------------------------------------------------------
     def __init__(self, line, lineNo, match):
@@ -273,6 +273,24 @@ class DirectiveClass(Directive):
     #---------------------------------------------------------------------------
     def getClassName(self):       return self.className
     def isSuperReplaceable(self): return True
+        
+#-------------------------------------------------------------------------------
+#
+#-------------------------------------------------------------------------------
+class DirectiveExtension(Directive):
+
+    matchPattern = re.compile("^extension\s+(\S+)\s*$")
+
+    #---------------------------------------------------------------------------
+    def __init__(self, line, lineNo, match):
+        Directive.__init__(self, line, lineNo, match)
+
+    #---------------------------------------------------------------------------
+    def compile(self):
+        extensionName  = self.match.group(1)
+
+        self.line = "scooj.defExtension(%s)" 
+        self.line = self.line % (extensionName)
         
 #-------------------------------------------------------------------------------
 #
@@ -512,6 +530,7 @@ class DirectiveRequire(Directive):
 #-------------------------------------------------------------------------------
 Directive.classes.extend([
     DirectiveClass,
+    DirectiveExtension,
     DirectiveStaticMethod,
     DirectiveStaticGetter,
     DirectiveStaticSetter,

@@ -1,0 +1,31 @@
+
+//-----------------------------------------------------------------------------
+// Copyright (c) 2010 Patrick Mueller
+// Licensed under the MIT license: 
+// http://www.opensource.org/licenses/mit-license.php
+//-----------------------------------------------------------------------------
+
+//----------------------------------------------------------------------------
+class TestExtensions
+
+//----------------------------------------------------------------------------
+static 
+
+    var SomeOtherFunctions = {
+        a: function a() { return "a" },
+        b: function  () { return "b" }
+    }
+    
+//----------------------------------------------------------------------------
+extension SomeOtherFunctions
+
+//----------------------------------------------------------------------------
+static method runTests
+
+    var te = new TestExtensions()
+    if (te.a() != "a") throw new Error("should have return 'a'")
+    if (te.b() != "b") throw new Error("should have return 'b'")
+
+//----------------------------------------------------------------------------
+static
+    TestExtensions.runTestss()

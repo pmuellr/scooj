@@ -38,9 +38,9 @@ export(function defClass(module, superclass, func) {
         superclass = null
     }
     
-    ensureNamedFunction(func)
+    var funcName = ensureNamedFunction(func)
     
-    var fullClassName = module.id + "::" + func.name
+    var fullClassName = module.id + "::" + funcName
     
     if (scooj._classes.hasOwnProperty(fullClassName)) {
         throw new Error("class is already defined: " + fullClassName)
@@ -51,7 +51,7 @@ export(function defClass(module, superclass, func) {
     func._scooj.owningClass   = func
     func._scooj.superclass    = superclass
     func._scooj.subclasses    = {}
-    func._scooj.name          = func.name
+    func._scooj.name          = funcName
     func._scooj.moduleId      = module.id
     func._scooj.fullClassName = fullClassName
     func._scooj.methods       = {}
@@ -78,6 +78,32 @@ export(function defClass(module, superclass, func) {
     if (typeof(module.exports) != "function") module.exports = func
     
     return func
+})
+
+//----------------------------------------------------------------------------
+// class extension
+//----------------------------------------------------------------------------
+export(function defExtension(extensionObject) {
+    var klass = ensureClassCurrentlyDefined()
+
+    for (var key in extensionObject) {
+        var val = extensionObject[key]
+        if (typeof val != "function") continue
+        
+        if (!val.name) {
+            if (!val.displayName) {
+                val.displayName = key
+            }
+        }
+        
+        var valName = val.name || val.displayName
+        if (valName != key) {
+            throw new Error("function name doesn't match key it was stored under: " + valName)
+        }
+        
+        this.defMethod(val)
+        
+    }
 })
 
 //----------------------------------------------------------------------------
@@ -167,7 +193,7 @@ function getSuperMethod(owningClass) {
 // add a method to a class
 //----------------------------------------------------------------------------
 function addMethod(func, isStatic, isGetter, isSetter) {
-    ensureNamedFunction(func)
+    var funcName = ensureNamedFunction(func)
     var klass = ensureClassCurrentlyDefined()
     
     var methodContainer
@@ -203,51 +229,42 @@ function addMethod(func, isStatic, isGetter, isSetter) {
     func._scooj.isGetter    = isGetter
     func._scooj.isSetter    = isSetter
     
-    methodContainer[func.name] = func
+    methodContainer[funcName] = func
     
     if (isStatic) {
     	if (isGetter)
-    		klass.__defineGetter__(func.name, func)
+    		klass.__defineGetter__(funcName, func)
     	else if (isSetter)
-    		klass.__defineSetter__(func.name, func)
+    		klass.__defineSetter__(funcName, func)
     	else 
-    		klass[func.name] = func
+    		klass[funcName] = func
     }
     
     else {
     	if (isGetter)
-    		klass.prototype.__defineGetter__(func.name, func)
+    		klass.prototype.__defineGetter__(funcName, func)
     	else if (isSetter)
-    		klass.prototype.__defineSetter__(func.name, func)
+    		klass.prototype.__defineSetter__(funcName, func)
     	else 
-    		klass.prototype[func.name] = func
+    		klass.prototype[funcName] = func
     }
     
     return func
 }
 
 //----------------------------------------------------------------------------
-// ensure no methods
-//----------------------------------------------------------------------------
-function ensureNoMethods() {
-    var klass = ensureClassCurrentlyDefined()
-    
-    for (var name in klass.methods) {
-        if (!klass.methods.hasOwnProperty(name)) continue
-        
-        throw new Error("class already has methods defined: " + klass.name)
-    }
-}
-
-
-//----------------------------------------------------------------------------
 // ensure parameter is a named function
 //----------------------------------------------------------------------------
 function ensureNamedFunction(func) {
     if (typeof func != "function") throw new Error("expecting a function: " + func)
-    if (!func.name) throw new Error("function must not be anonymous: " + func)
     
-    return func.name
+    if (!func.name) {
+        if (!func.displayName) {
+            throw new Error("function must not be anonymous: " + func)
+        }
+    }
+    
+    return func.name || func.displayName
 }
 
 //----------------------------------------------------------------------------
@@ -263,19 +280,9 @@ function ensureClassCurrentlyDefined() {
 // export a function
 //----------------------------------------------------------------------------
 function export(func) {
-    ensureNamedFunction(func)
+    var funcName = ensureNamedFunction(func)
     
-    exports[func.name] = func
-}
-
-//----------------------------------------------------------------------------
-// 
-//----------------------------------------------------------------------------
-function getName(o) {
-    if (!o) return "null"
-    o = o.name
-    if (!o) return "null"
-    return o
+    exports[funcName] = func
 }
 
 //----------------------------------------------------------------------------
