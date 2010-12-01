@@ -10,7 +10,6 @@ scooj.installGlobals()
 
 var TestRunner = require("./unit-test/TestRunner")
 
-//---------------------------------------------------
 console.log("-------- running scooj tests ---------------")
 
 var RunTests   = require("./scooj/RunTests")
@@ -22,7 +21,6 @@ TestRunner.resultsToConsole("RunTests", results)
 
 var animals = require("./scooj/Animals")
 
-//---------------------------------------------------
 console.log("-------- running scoop tests ---------------")
 
 var RunTests   = require("./scoop/RunTests")
@@ -35,4 +33,5 @@ TestRunner.resultsToConsole("RunTests", results)
 var animals = require("./scoop/Animals")
 
 require("./scoop/Etc").runTests()
+require("./scoop/Mixins")
 

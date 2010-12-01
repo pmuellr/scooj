@@ -6,7 +6,7 @@
 //-----------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------
-class TestExtensions
+class TestMixins
 
 //----------------------------------------------------------------------------
 static 
@@ -17,15 +17,37 @@ static
     }
     
 //----------------------------------------------------------------------------
-extension SomeOtherFunctions
+mixin SomeOtherFunctions
 
 //----------------------------------------------------------------------------
 static method runTests
 
-    var te = new TestExtensions()
-    if (te.a() != "a") throw new Error("should have return 'a'")
-    if (te.b() != "b") throw new Error("should have return 'b'")
+    var te = new TestMixins()
+    if (te.a() != "a") throw new Error("should have returned 'a'")
+    if (te.b() != "b") throw new Error("should have returned 'b'")
+    
+    var amu = new AMixinUser()
+    if (amu.x() != "X") throw new Error("should have returned 'X'")
+    if (amu.y() != "Y") throw new Error("should have returned 'Y'")
+
+//----------------------------------------------------------------------------
+class AMixin
+
+method x
+    return "X"
+    
+method y
+    return "Y"
+    
+//----------------------------------------------------------------------------
+class AMixinUser
+
+mixin AMixin
 
 //----------------------------------------------------------------------------
 static
-    TestExtensions.runTestss()
+    TestMixins.runTests()
+    
+    console.log("Mixins tests pass")    
+
+    

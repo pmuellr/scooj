@@ -12,7 +12,7 @@ import sys
 import optparse
 
 PROGRAM = os.path.basename(sys.argv[0])
-VERSION = "1.0.1"
+VERSION = "1.1.0"
 
 ExtensionScoop      = ".scoop"
 ExtensionJavaScript = ".js"
@@ -277,9 +277,9 @@ class DirectiveClass(Directive):
 #-------------------------------------------------------------------------------
 #
 #-------------------------------------------------------------------------------
-class DirectiveExtension(Directive):
+class DirectiveMixin(Directive):
 
-    matchPattern = re.compile("^extension\s+(\S+)\s*$")
+    matchPattern = re.compile("^mixin\s+(\S+)\s*$")
 
     #---------------------------------------------------------------------------
     def __init__(self, line, lineNo, match):
@@ -289,7 +289,7 @@ class DirectiveExtension(Directive):
     def compile(self):
         extensionName  = self.match.group(1)
 
-        self.line = "scooj.defExtension(%s)" 
+        self.line = "scooj.useMixin(%s)" 
         self.line = self.line % (extensionName)
         
 #-------------------------------------------------------------------------------
@@ -530,7 +530,7 @@ class DirectiveRequire(Directive):
 #-------------------------------------------------------------------------------
 Directive.classes.extend([
     DirectiveClass,
-    DirectiveExtension,
+    DirectiveMixin,
     DirectiveStaticMethod,
     DirectiveStaticGetter,
     DirectiveStaticSetter,

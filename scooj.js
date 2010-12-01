@@ -16,7 +16,7 @@ if (typeof exports == "undefined") {
 // hidden globals
 //----------------------------------------------------------------------------
 var scooj = {}
-scooj.version         = "1.0.1"
+scooj.version         = "1.1.0"
 scooj._global         = getGlobalObject()
 scooj._classes        = {}
 scooj._currentClass   = null
@@ -54,6 +54,7 @@ export(function defClass(module, superclass, func) {
     func._scooj.name          = funcName
     func._scooj.moduleId      = module.id
     func._scooj.fullClassName = fullClassName
+    func._scooj.mixins        = []
     func._scooj.methods       = {}
     func._scooj.staticMethods = {}
     func._scooj.getters       = {}
@@ -75,34 +76,41 @@ export(function defClass(module, superclass, func) {
     
     func.$super = getSuperMethod(func)
 
+    // export the first class defined in a module
     if (typeof(module.exports) != "function") module.exports = func
     
     return func
 })
 
 //----------------------------------------------------------------------------
-// class extension
+// class mixin - copy functions in mixinObject into prototype
 //----------------------------------------------------------------------------
-export(function defExtension(extensionObject) {
+export(function useMixin(mixinObject) {
     var klass = ensureClassCurrentlyDefined()
 
-    for (var key in extensionObject) {
-        var val = extensionObject[key]
-        if (typeof val != "function") continue
+    klass._scooj.mixins.push(mixinObject)
+    
+    var methodBag = mixinObject
+    if (methodBag._scooj) {
+        methodBag = methodBag._scooj.methods
+    }
+    
+    for (var funcName in methodBag) {
+        var func = methodBag[funcName]
+        if (typeof func != "function") continue
         
-        if (!val.name) {
-            if (!val.displayName) {
-                val.displayName = key
+        if (!func.name) {
+            if (!func.displayName) {
+                func.displayName = funcName
             }
         }
         
-        var valName = val.name || val.displayName
-        if (valName != key) {
+        var funcName2 = func.name || func.displayName
+        if (funcName != funcName2) {
             throw new Error("function name doesn't match key it was stored under: " + valName)
         }
         
-        this.defMethod(val)
-        
+        this.defMethod(func)
     }
 })
 
