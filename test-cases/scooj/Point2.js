@@ -17,7 +17,7 @@ defClass(module, function Point2(properties) {
 })
 
 //----------------------------------------------------------------------------
-defMethod(function add(aPoint) {
+defMethod(module, function add(aPoint) {
     var result = new this.constructor(this)
     
     result.x += aPoint.x
@@ -27,7 +27,7 @@ defMethod(function add(aPoint) {
 })
 
 //----------------------------------------------------------------------------
-defMethod(function toString() {
+defMethod(module, function toString() {
     var result = this.constructor.name + "{ "
 
     result += "x:" + this.x + "; "

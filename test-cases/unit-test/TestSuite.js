@@ -12,43 +12,43 @@ defClass(module, function TestSuite() {
 })
 
 //-------------------------------------------------------------------
-defStaticMethod(function suiteSetUp() {})
-defStaticMethod(function suiteTearDown() {})
+defStaticMethod(module, function suiteSetUp() {})
+defStaticMethod(module, function suiteTearDown() {})
 
 //-------------------------------------------------------------------
-defMethod(function setUp() {})
-defMethod(function tearDown() {})
+defMethod(module, function setUp() {})
+defMethod(module, function tearDown() {})
 
 //-------------------------------------------------------------------
-defMethod(function assertEqual(expected, actual, message) {
+defMethod(module, function assertEqual(expected, actual, message) {
     if (expected == actual) return
 
     this.fail(message || expected + " != " + actual)
 })  
 
 //-------------------------------------------------------------------
-defMethod(function assertStrictEqual(expected, actual, message) {
+defMethod(module, function assertStrictEqual(expected, actual, message) {
     if (expected === actual) return
     
     this.fail(message || expected + " !== " + actual)
 })  
 
 //-------------------------------------------------------------------
-defMethod(function assertTrue(actual, message) {
+defMethod(module, function assertTrue(actual, message) {
     if (actual) return
 
     this.fail(message || actual + " is not truthy")
 })  
 
 //-------------------------------------------------------------------
-defMethod(function assertFalse(actual, message) {
+defMethod(module, function assertFalse(actual, message) {
     if (actual == null) return
     
     this.fail(message || actual + " is not falsey")
 })  
 
 //-------------------------------------------------------------------
-defMethod(function fail(message) {
+defMethod(module, function fail(message) {
     var ex = new Error(message || "failure")
     ex.isAssertionError = true
     throw ex

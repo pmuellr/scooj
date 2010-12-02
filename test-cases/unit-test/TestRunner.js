@@ -13,12 +13,12 @@ defClass(module, function TestRunner() {
 })
 
 //-------------------------------------------------------------------
-defMethod(function addTestSuite(testSuiteClass) {
+defMethod(module, function addTestSuite(testSuiteClass) {
     this.suites.push(testSuiteClass)
 })
 
 //-------------------------------------------------------------------
-defMethod(function run(results) {
+defMethod(module, function run(results) {
     if (!results) results = {}
     if (!results.passes) results.passes = []
     if (!results.fails)  results.fails  = []
@@ -32,7 +32,7 @@ defMethod(function run(results) {
 })
 
 //-------------------------------------------------------------------
-defMethod(function _runSuite(suiteClass, results) {
+defMethod(module, function _runSuite(suiteClass, results) {
     if (!this._runCatching(suiteClass, "suiteSetUp", results)) return    
     
     var tests = this._getTests(suiteClass)
@@ -48,7 +48,7 @@ defMethod(function _runSuite(suiteClass, results) {
 })
 
 //-------------------------------------------------------------------
-defMethod(function _newSuite(suiteClass, results) {
+defMethod(module, function _newSuite(suiteClass, results) {
     try {
         return new suiteClass()
     }
@@ -59,7 +59,7 @@ defMethod(function _newSuite(suiteClass, results) {
 })
 
 //-------------------------------------------------------------------
-defMethod(function _runCatching(suite, methodName, results) {
+defMethod(module, function _runCatching(suite, methodName, results) {
     var func
     
     if (!suite[methodName]) return true
@@ -75,7 +75,7 @@ defMethod(function _runCatching(suite, methodName, results) {
 })
 
 //-------------------------------------------------------------------
-defMethod(function _getTests(suiteClass) {
+defMethod(module, function _getTests(suiteClass) {
     var tests = []
     
     for (var propertyName in suiteClass.prototype) {
@@ -89,7 +89,7 @@ defMethod(function _getTests(suiteClass) {
 })
 
 //-------------------------------------------------------------------
-defMethod(function _runTest(suite, testName, results) {
+defMethod(module, function _runTest(suite, testName, results) {
 
     if (!this._runCatching(suite, "setUp", results)) return    
     
@@ -116,7 +116,7 @@ defMethod(function _runTest(suite, testName, results) {
 })
 
 //-------------------------------------------------------------------
-defStaticMethod(function resultsAsHTML(label, results) {
+defStaticMethod(module, function resultsAsHTML(label, results) {
 
     function generateSection(html, title, type) {
         html.push("<div class='test-messages-section'>")
@@ -151,7 +151,7 @@ defStaticMethod(function resultsAsHTML(label, results) {
 })
 
 //-------------------------------------------------------------------
-defStaticMethod(function resultsToConsole(label, results) {
+defStaticMethod(module, function resultsToConsole(label, results) {
 
     function generateSection(title, type) {
         console.log(title)

@@ -15,10 +15,10 @@ defClass(module, Point2, function Point3(properties) {
 })
 
 //----------------------------------------------------------------------------
-var $super = defSuper()
+var $super = defSuper(module)
 
 //----------------------------------------------------------------------------
-defMethod(function add(aPoint) {
+defMethod(module, function add(aPoint) {
     var result = $super(this, "add", aPoint)
     
     if (aPoint.z) {

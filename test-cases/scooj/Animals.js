@@ -16,17 +16,17 @@ var Animal = defClass(module, function Animal(name) {
     this.name = name
 })
 
-    defStaticMethod(function report(message) {
+    defStaticMethod(module, function report(message) {
         if (!Animal.reports) Animal.reports = []
         Animal.reports.push(message)
     })
     
-    defStaticMethod(function getReports() {
+    defStaticMethod(module, function getReports() {
         if (!Animal.reports) Animal.reports = []
         return Animal.reports
     })
     
-    defMethod(function move(meters){
+    defMethod(module, function move(meters){
         Animal.report(this.name + " moved " + meters + "m.")
     })
 
@@ -36,9 +36,9 @@ var Snake = defClass(module, Animal, function Snake(name) {
     $superSnake(this, null, name)
 })
 
-    var $superSnake = defSuper()
+    var $superSnake = defSuper(module)
 
-    defMethod(function move(meters){
+    defMethod(module, function move(meters){
         Animal.report("Slithering...")
         $superSnake(this, "move", 5)
     })
@@ -48,9 +48,9 @@ var Horse = defClass(module, Animal, function Horse(name) {
     $superHorse(this, null, name)
 })
 
-    var $superHorse = defSuper()
+    var $superHorse = defSuper(module)
 
-    defMethod(function move(meters){
+    defMethod(module, function move(meters){
         Animal.report("Galloping...")
         $superSnake(this, "move", 45)
     })

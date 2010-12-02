@@ -19,12 +19,12 @@ var scooj = {}
 scooj.version         = "1.1.0"
 scooj._global         = getGlobalObject()
 scooj._classes        = {}
-scooj._currentClass   = null
+scooj._currentClass   = {}
 
 //----------------------------------------------------------------------------
 // 
 //----------------------------------------------------------------------------
-export(function defClass(module, superclass, func) {
+addExport(function defClass(module, superclass, func) {
     if (null == module) {
         throw new Error("must pass a module as the first parameter")
     }
@@ -64,7 +64,7 @@ export(function defClass(module, superclass, func) {
     
     scooj._classes[fullClassName] = func
     
-    scooj._currentClass = func
+    scooj._currentClass[module.id] = func
     
     if (superclass) {
         var T = function() {}
@@ -85,8 +85,8 @@ export(function defClass(module, superclass, func) {
 //----------------------------------------------------------------------------
 // class mixin - copy functions in mixinObject into prototype
 //----------------------------------------------------------------------------
-export(function useMixin(mixinObject) {
-    var klass = ensureClassCurrentlyDefined()
+addExport(function useMixin(module, mixinObject) {
+    var klass = ensureClassCurrentlyDefined(module)
 
     klass._scooj.mixins.push(mixinObject)
     
@@ -110,32 +110,32 @@ export(function useMixin(mixinObject) {
             throw new Error("function name doesn't match key it was stored under: " + valName)
         }
         
-        this.defMethod(func)
+        this.defMethod(module, func)
     }
 })
 
 //----------------------------------------------------------------------------
 // 
 //----------------------------------------------------------------------------
-export(function endClass() {
-    scooj._currentClass = null
+addExport(function endClass() {
+    console.log("scooj.endClass() is deprecated")
 })
 
 //----------------------------------------------------------------------------
 // method/accessor definers
 //----------------------------------------------------------------------------
-export(function defMethod(func)       {return addMethod(func, false, false, false)})
-export(function defStaticMethod(func) {return addMethod(func, true,  false, false)})
-export(function defGetter(func)       {return addMethod(func, false, true,  false)})
-export(function defSetter(func)       {return addMethod(func, false, false, true)})
-export(function defStaticGetter(func) {return addMethod(func, true,  true,  false)})
-export(function defStaticSetter(func) {return addMethod(func, true,  false, true)})
+addExport(function defMethod(module, func)       {return addMethod(module, func, false, false, false)})
+addExport(function defStaticMethod(module, func) {return addMethod(module, func, true,  false, false)})
+addExport(function defGetter(module, func)       {return addMethod(module, func, false, true,  false)})
+addExport(function defSetter(module, func)       {return addMethod(module, func, false, false, true)})
+addExport(function defStaticGetter(module, func) {return addMethod(module, func, true,  true,  false)})
+addExport(function defStaticSetter(module, func) {return addMethod(module, func, true,  false, true)})
 
 //----------------------------------------------------------------------------
 // return a super invoker
 //----------------------------------------------------------------------------
-export(function defSuper() {
-    var klass = ensureClassCurrentlyDefined()
+addExport(function defSuper(module) {
+    var klass = ensureClassCurrentlyDefined(module)
 
     return getSuperMethod(klass)
 })
@@ -145,7 +145,7 @@ export(function defSuper() {
 //----------------------------------------------------------------------------
 var globalsInstalled = false
 
-export(function installGlobals() {
+addExport(function installGlobals() {
     var globalNames = [
         "defClass",
         "defMethod",
@@ -200,9 +200,9 @@ function getSuperMethod(owningClass) {
 //----------------------------------------------------------------------------
 // add a method to a class
 //----------------------------------------------------------------------------
-function addMethod(func, isStatic, isGetter, isSetter) {
+function addMethod(module, func, isStatic, isGetter, isSetter) {
     var funcName = ensureNamedFunction(func)
-    var klass = ensureClassCurrentlyDefined()
+    var klass = ensureClassCurrentlyDefined(module)
     
     var methodContainer
     if (isGetter) {
@@ -232,6 +232,8 @@ function addMethod(func, isStatic, isGetter, isSetter) {
     
     func._scooj = {}
     func._scooj.owningClass = klass
+    func._scooj.signature   = module.id + "." + funcName + "()"
+    func._scooj.displayName = func._scooj.signature
     func._scooj.isMethod    = true
     func._scooj.isStatic    = isStatic
     func._scooj.isGetter    = isGetter
@@ -278,16 +280,16 @@ function ensureNamedFunction(func) {
 //----------------------------------------------------------------------------
 // ensure a class is currently defined
 //----------------------------------------------------------------------------
-function ensureClassCurrentlyDefined() {
-    if (!scooj._currentClass) throw new Error("no class currently defined")
+function ensureClassCurrentlyDefined(module) {
+    if (!scooj._currentClass[module.id]) throw new Error("no class currently defined")
     
-    return scooj._currentClass
+    return scooj._currentClass[module.id]
 }
 
 //----------------------------------------------------------------------------
 // export a function
 //----------------------------------------------------------------------------
-function export(func) {
+function addExport(func) {
     var funcName = ensureNamedFunction(func)
     
     exports[funcName] = func

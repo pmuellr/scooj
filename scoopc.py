@@ -136,7 +136,7 @@ def compile(source, iFileName, path, baseName):
     if lastDirective:
         suffix = lastDirective.endingSuffix()
         if suffix == "": suffix = ";"
-        lastDirective.body.append("%sscooj.endClass();" % suffix)    
+        lastDirective.body.append(suffix)    
         
     # generate the output
     lines = []
@@ -289,7 +289,7 @@ class DirectiveMixin(Directive):
     def compile(self):
         extensionName  = self.match.group(1)
 
-        self.line = "scooj.useMixin(%s)" 
+        self.line = "scooj.useMixin(module, %s)" 
         self.line = self.line % (extensionName)
         
 #-------------------------------------------------------------------------------
@@ -312,7 +312,7 @@ class DirectiveStaticMethod(Directive):
         
         if not methodParms: methodParms = "()"
         
-        self.line = "scooj.defStaticMethod(function %s%s {" 
+        self.line = "scooj.defStaticMethod(module, function %s%s {" 
         self.line = self.line % (methodName, methodParms)
             
     #---------------------------------------------------------------------------
@@ -339,7 +339,7 @@ class DirectiveStaticGetter(Directive):
         
         self.methodName = methodName
         
-        self.line = "scooj.defStaticGetter(function %s() {" 
+        self.line = "scooj.defStaticGetter(module, function %s() {" 
         self.line = self.line % (methodName)
             
     #---------------------------------------------------------------------------
@@ -367,7 +367,7 @@ class DirectiveStaticSetter(Directive):
         
         self.methodName = methodName
         
-        self.line = "scooj.defStaticSetter(function %s%s {" 
+        self.line = "scooj.defStaticSetter(module, function %s%s {" 
         self.line = self.line % (methodName, methodParms)
             
     #---------------------------------------------------------------------------
@@ -397,7 +397,7 @@ class DirectiveMethod(Directive):
 
         if not methodParms: methodParms = "()"
         
-        self.line = "scooj.defMethod(function %s%s {" 
+        self.line = "scooj.defMethod(module, function %s%s {" 
         self.line = self.line % (methodName, methodParms)
             
     #---------------------------------------------------------------------------
@@ -425,7 +425,7 @@ class DirectiveGetter(Directive):
         
         self.methodName = methodName
         
-        self.line = "scooj.defGetter(function %s() {" 
+        self.line = "scooj.defGetter(module, function %s() {" 
         self.line = self.line % (methodName)
             
     #---------------------------------------------------------------------------
@@ -454,7 +454,7 @@ class DirectiveSetter(Directive):
         
         self.methodName = methodName
         
-        self.line = "scooj.defSetter(function %s%s {" 
+        self.line = "scooj.defSetter(module, function %s%s {" 
         self.line = self.line % (methodName, methodParms)
             
     #---------------------------------------------------------------------------
