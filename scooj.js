@@ -232,12 +232,13 @@ function addMethod(module, func, isStatic, isGetter, isSetter) {
     
     func._scooj = {}
     func._scooj.owningClass = klass
-    func._scooj.signature   = module.id + "." + funcName + "()"
-    func._scooj.displayName = func._scooj.signature
     func._scooj.isMethod    = true
     func._scooj.isStatic    = isStatic
     func._scooj.isGetter    = isGetter
     func._scooj.isSetter    = isSetter
+
+    func.signature   = module.id + "." + funcName + "()"
+    func.displayName = func._scooj.signature
     
     methodContainer[funcName] = func
     

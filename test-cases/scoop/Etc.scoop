@@ -15,15 +15,19 @@ static
 
 //----------------------------------------------------------------------------
 static method runTests
-    if (Etc.A != "A") throw error("expecting Etc.A == 'A'")
+    if (Etc.A != "A") error("expecting Etc.A == 'A'")
     Etc.A = "B"
-    if (Etc.A != "B") throw error("expecting Etc.A == 'B'")
+    if (Etc.A != "B") error("expecting Etc.A == 'B'")
     
     var etc = new Etc()
-    if (etc.a != "a") throw error("expecting etc.a == 'a'")
+    if (etc.a != "a") error("expecting etc.a == 'a'")
     etc.a = "b"
-    if (etc.a != "b") throw error("expecting etc.a == 'b'")
+    if (etc.a != "b") error("expecting etc.a == 'b'")
 
+    if (arguments.callee.signature != "scoop/Etc.runTests()") {
+        error("method signature wrong")
+    }
+    
     log("Etc tests pass")    
 
 //----------------------------------------------------------------------------
