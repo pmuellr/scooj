@@ -483,8 +483,8 @@ class DirectiveFunction(Directive):
 
         if not functionParms: functionParms = "()"
         
-        self.line = "var %s = function %s%s {" 
-        self.line = self.line % (functionName, functionName, functionParms)
+        self.line = "function %s%s {" 
+        self.line = self.line % (functionName, functionParms)
             
     #---------------------------------------------------------------------------
     def endingSuffix(self):
