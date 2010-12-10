@@ -46,6 +46,8 @@ addExport(function defClass(module, superclass, func) {
         throw new Error("class is already defined: " + fullClassName)
     }
     
+    func.signature = module.id + "." + funcName + "()"
+    
     func._scooj = {}
     func._scooj.isClass       = true
     func._scooj.owningClass   = func
@@ -77,7 +79,10 @@ addExport(function defClass(module, superclass, func) {
     func.$super = getSuperMethod(func)
 
     // export the first class defined in a module
-    if (typeof(module.exports) != "function") module.exports = func
+    if (typeof(module.exports) != "function") {
+        func.signature = module.id + "()"
+        module.exports = func
+    }
     
     return func
 })
