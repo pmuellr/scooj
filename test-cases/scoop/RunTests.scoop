@@ -5,10 +5,10 @@
 // http://www.opensource.org/licenses/mit-license.php
 //-----------------------------------------------------------------------------
 
-require ../unit-test/TestSuite
-require ./Point2
-require ./Point3
-require ./Point4
+requireClass ../unit-test/TestSuite
+requireClass ./Point2
+requireClass ./Point3
+requireClass ./Point4
 
 //----------------------------------------------------------------------------
 class RunTests < TestSuite

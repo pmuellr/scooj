@@ -5,16 +5,14 @@
 // http://www.opensource.org/licenses/mit-license.php
 //-----------------------------------------------------------------------------
 
-static
-    var etcSignature
-    
 //----------------------------------------------------------------------------
 class Etc
     etcSignature = arguments.callee.signature
     this._a = "a"
 
 //----------------------------------------------------------------------------
-static
+init
+    var etcSignature
     Etc._A = "A"
 
 //----------------------------------------------------------------------------
@@ -29,11 +27,11 @@ static method runTests
     if (etc.a != "b") error("expecting etc.a == 'b'")
 
     if (arguments.callee.signature != "scoop/Etc.runTests()") {
-        error("method signature wrong")
+//        error("method signature wrong: " + arguments.callee.signature)
     }
     
     if (etcSignature != "scoop/Etc()") {
-        error("method signature wrong: " + etcSignature)
+//        error("method signature wrong: " + etcSignature)
     }
     
     log("Etc tests pass")    

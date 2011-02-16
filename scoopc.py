@@ -20,8 +20,6 @@ ExtensionJavaScript = ".js"
 Options = None
 
 #-------------------------------------------------------------------------------
-# main program
-#-------------------------------------------------------------------------------
 def main(): 
     global Options
 
@@ -41,8 +39,6 @@ def main():
         else:
             processFile(iFileName)
 
-#-------------------------------------------------------------------------------
-# process a file
 #-------------------------------------------------------------------------------
 def processFile(iFileName, path=""):
     baseName = os.path.basename(iFileName)[:-6]
@@ -67,8 +63,6 @@ def processFile(iFileName, path=""):
     log("generated module %s/%s in %s" % (path, baseName, oFileName))
 
 #-------------------------------------------------------------------------------
-# process a directory
-#-------------------------------------------------------------------------------
 def processDir(iDirName, path=""):
     verbose("processDir:  %s path: %s" % (iDirName, path))
 
@@ -87,8 +81,6 @@ def processDir(iDirName, path=""):
             processFile(fullName, path)
 
 #-------------------------------------------------------------------------------
-# compile a scoop file
-#-------------------------------------------------------------------------------
 def compile(source, iFileName, path, baseName):
 
     # split file into lines
@@ -101,9 +93,9 @@ def compile(source, iFileName, path, baseName):
     patternDirective = re.compile(r"^[\w\$\._@]+")
     for lineNo, line in enumerate(lines):
         if patternDirective.match(line):
-            directive = Directive.fromLine(line, lineNo)
+            directive = Directive.fromLine(iFileName, line, lineNo)
             if None == directive:
-                error("%s:%d unknown directive found: '%s'" % (iFileName, lineNo, line))
+                errorFile(iFileName, lineNo, "unknown directive found: '%s'" % line)
             
             directives.append(directive)
             
@@ -160,8 +152,6 @@ def compile(source, iFileName, path, baseName):
     return "\n".join(lines)        
 
 #-------------------------------------------------------------------------------
-# replace super method invocations
-#-------------------------------------------------------------------------------
 def replaceSuperInvocations(className, methodName, methodBody):
     pattern1 = re.compile(r"([^\w\$])super\(\s*\)")
     pattern2 = re.compile(r"([^\w\$])super\(")
@@ -181,19 +171,17 @@ def replaceSuperInvocations(className, methodName, methodBody):
     return methodBody
 
 #-------------------------------------------------------------------------------
-# base directive
-#-------------------------------------------------------------------------------
 class Directive:
     
     classes = []
 
     #---------------------------------------------------------------------------
     @staticmethod
-    def fromLine(line, lineNo):
+    def fromLine(fileName, line, lineNo):
         for cls in Directive.classes:
             match = cls.match(line)
             if match:
-                return cls(line, lineNo, match)
+                return cls(fileName, line, lineNo, match)
                 
         return None
     
@@ -203,7 +191,8 @@ class Directive:
         return cls.matchPattern.match(line)
         
     #---------------------------------------------------------------------------
-    def __init__(self, line, lineNo, match):
+    def __init__(self, fileName, line, lineNo, match):
+        self.fileName = fileName
         self.line     = line
         self.lineNo   = lineNo
         self.match    = match
@@ -238,15 +227,13 @@ class Directive:
     def isSuperReplaceable(self): return False
 
 #-------------------------------------------------------------------------------
-#
-#-------------------------------------------------------------------------------
 class DirectiveClass(Directive):
 
     matchPattern = re.compile("^class\s+([\w$_]+)\s*(\(.*\))?\s*(<\s*(\S+))?\s*$")
 
     #---------------------------------------------------------------------------
-    def __init__(self, line, lineNo, match):
-        Directive.__init__(self, line, lineNo, match)
+    def __init__(self, fileName, line, lineNo, match):
+        Directive.__init__(self, fileName, line, lineNo, match)
 
     #---------------------------------------------------------------------------
     def compile(self):
@@ -275,15 +262,13 @@ class DirectiveClass(Directive):
     def isSuperReplaceable(self): return True
         
 #-------------------------------------------------------------------------------
-#
-#-------------------------------------------------------------------------------
 class DirectiveMixin(Directive):
 
     matchPattern = re.compile("^mixin\s+(\S+)\s*$")
 
     #---------------------------------------------------------------------------
-    def __init__(self, line, lineNo, match):
-        Directive.__init__(self, line, lineNo, match)
+    def __init__(self, fileName, line, lineNo, match):
+        Directive.__init__(self, fileName, line, lineNo, match)
 
     #---------------------------------------------------------------------------
     def compile(self):
@@ -293,15 +278,13 @@ class DirectiveMixin(Directive):
         self.line = self.line % (extensionName)
         
 #-------------------------------------------------------------------------------
-#
-#-------------------------------------------------------------------------------
 class DirectiveStaticMethod(Directive):
 
     matchPattern = re.compile("^static\s+method\s+([\w$_]+)\s*(\(.*\))?\s*$")
 
     #---------------------------------------------------------------------------
-    def __init__(self, line, lineNo, match):
-        Directive.__init__(self, line, lineNo, match)
+    def __init__(self, fileName, line, lineNo, match):
+        Directive.__init__(self, fileName, line, lineNo, match)
 
     #---------------------------------------------------------------------------
     def compile(self):
@@ -323,15 +306,13 @@ class DirectiveStaticMethod(Directive):
     def getMethodName(self):  return self.methodName
         
 #-------------------------------------------------------------------------------
-#
-#-------------------------------------------------------------------------------
 class DirectiveStaticGetter(Directive):
 
     matchPattern = re.compile("^static\s+getter\s+([\w$_]+)\s*$")
     
     #---------------------------------------------------------------------------
-    def __init__(self, line, lineNo, match):
-        Directive.__init__(self, line, lineNo, match)
+    def __init__(self, fileName, line, lineNo, match):
+        Directive.__init__(self, fileName, line, lineNo, match)
 
     #---------------------------------------------------------------------------
     def compile(self):
@@ -350,15 +331,13 @@ class DirectiveStaticGetter(Directive):
     def getMethodName(self):  return self.methodName
         
 #-------------------------------------------------------------------------------
-#
-#-------------------------------------------------------------------------------
 class DirectiveStaticSetter(Directive):
 
     matchPattern = re.compile("^static\s+setter\s+([\w$_]+)\s*(\(.*\))\s*$")
 
     #---------------------------------------------------------------------------
-    def __init__(self, line, lineNo, match):
-        Directive.__init__(self, line, lineNo, match)
+    def __init__(self, fileName, line, lineNo, match):
+        Directive.__init__(self, fileName, line, lineNo, match)
 
     #---------------------------------------------------------------------------
     def compile(self):
@@ -378,15 +357,13 @@ class DirectiveStaticSetter(Directive):
     def getMethodName(self):  return self.methodName
         
 #-------------------------------------------------------------------------------
-#
-#-------------------------------------------------------------------------------
 class DirectiveMethod(Directive):
 
     matchPattern = re.compile("^method\s+([\w$_]+)\s*(\(.*\))?\s*$")
 
     #---------------------------------------------------------------------------
-    def __init__(self, line, lineNo, match):
-        Directive.__init__(self, line, lineNo, match)
+    def __init__(self, fileName, line, lineNo, match):
+        Directive.__init__(self, fileName, line, lineNo, match)
 
     #---------------------------------------------------------------------------
     def compile(self):
@@ -409,15 +386,13 @@ class DirectiveMethod(Directive):
     def isSuperReplaceable(self): return True
         
 #-------------------------------------------------------------------------------
-#
-#-------------------------------------------------------------------------------
 class DirectiveGetter(Directive):
 
     matchPattern = re.compile("^getter\s+([\w$_]+)\s*$")
 
     #---------------------------------------------------------------------------
-    def __init__(self, line, lineNo, match):
-        Directive.__init__(self, line, lineNo, match)
+    def __init__(self, fileName, line, lineNo, match):
+        Directive.__init__(self, fileName, line, lineNo, match)
 
     #---------------------------------------------------------------------------
     def compile(self):
@@ -437,15 +412,13 @@ class DirectiveGetter(Directive):
     def isSuperReplaceable(self): return True
         
 #-------------------------------------------------------------------------------
-#
-#-------------------------------------------------------------------------------
 class DirectiveSetter(Directive):
 
     matchPattern = re.compile("^setter\s+([\w$_]+)\s*(\(.*\))\s*$")
     
     #---------------------------------------------------------------------------
-    def __init__(self, line, lineNo, match):
-        Directive.__init__(self, line, lineNo, match)
+    def __init__(self, fileName, line, lineNo, match):
+        Directive.__init__(self, fileName, line, lineNo, match)
 
     #---------------------------------------------------------------------------
     def compile(self):
@@ -466,15 +439,13 @@ class DirectiveSetter(Directive):
     def isSuperReplaceable(self): return True
         
 #-------------------------------------------------------------------------------
-#
-#-------------------------------------------------------------------------------
 class DirectiveFunction(Directive):
 
     matchPattern = re.compile("^function\s+([\w$_]+)\s*(\(.*\))?\s*$")
 
     #---------------------------------------------------------------------------
-    def __init__(self, line, lineNo, match):
-        Directive.__init__(self, line, lineNo, match)
+    def __init__(self, fileName, line, lineNo, match):
+        Directive.__init__(self, fileName, line, lineNo, match)
 
     #---------------------------------------------------------------------------
     def compile(self):
@@ -491,30 +462,40 @@ class DirectiveFunction(Directive):
         return "}; "
         
 #-------------------------------------------------------------------------------
-#
-#-------------------------------------------------------------------------------
 class DirectiveStatic(Directive):
 
     matchPattern = re.compile("^static\s*$")
     
     #---------------------------------------------------------------------------
-    def __init__(self, line, lineNo, match):
-        Directive.__init__(self, line, lineNo, match)
+    def __init__(self, fileName, line, lineNo, match):
+        Directive.__init__(self, fileName, line, lineNo, match)
+        logFile(fileName, lineNo, "the static directive is deprecated - use init instead")
 
     #---------------------------------------------------------------------------
     def compile(self):
         self.line = "// static code run on first require()"
 
 #-------------------------------------------------------------------------------
-#
+class DirectiveInit(Directive):
+
+    matchPattern = re.compile("^init\s*$")
+
+    #---------------------------------------------------------------------------
+    def __init__(self, fileName, line, lineNo, match):
+        Directive.__init__(self, fileName, line, lineNo, match)
+
+    #---------------------------------------------------------------------------
+    def compile(self):
+        self.line = "// code run on first require()"
+
 #-------------------------------------------------------------------------------
 class DirectiveRequire(Directive):
 
     matchPattern = re.compile("^require\s+([\w$\.\-/]+)(\s+as\s+([\w$.-]+))?\s*$")
     
     #---------------------------------------------------------------------------
-    def __init__(self, line, lineNo, match):
-        Directive.__init__(self, line, lineNo, match)
+    def __init__(self, fileName, line, lineNo, match):
+        Directive.__init__(self, fileName, line, lineNo, match)
 
     #---------------------------------------------------------------------------
     def compile(self):
@@ -524,9 +505,43 @@ class DirectiveRequire(Directive):
         if not varName: varName = os.path.basename(moduleName)
         
         self.line = "var %s = require('%s');" % (varName, moduleName)
-        
+
 #-------------------------------------------------------------------------------
-#
+class DirectiveRequireClass(Directive):
+
+    matchPattern = re.compile("^requireClass\s+([\w$\.\-/]+)(\s+as\s+([\w$.-]+))?\s*$")
+
+    #---------------------------------------------------------------------------
+    def __init__(self, fileName, line, lineNo, match):
+        Directive.__init__(self, fileName, line, lineNo, match)
+
+    #---------------------------------------------------------------------------
+    def compile(self):
+        moduleName = self.match.group(1)
+        varName    = self.match.group(3)
+
+        if not varName: varName = os.path.basename(moduleName)
+
+        self.line = "var %s = require('%s'); if (typeof %s != 'function') throw Error('module %s did not export a class');" % (varName, moduleName, varName, moduleName)
+
+#-------------------------------------------------------------------------------
+class DirectiveRequireFunction(Directive):
+
+    matchPattern = re.compile("^requireFunction\s+([\w$\.\-/]+)(\s+as\s+([\w$.-]+))?\s*$")
+
+    #---------------------------------------------------------------------------
+    def __init__(self, fileName, line, lineNo, match):
+        Directive.__init__(self, fileName, line, lineNo, match)
+
+    #---------------------------------------------------------------------------
+    def compile(self):
+        moduleName = self.match.group(1)
+        varName    = self.match.group(3)
+
+        if not varName: varName = os.path.basename(moduleName)
+
+        self.line = "var %s = require('%s'); if (typeof %s != 'function') throw Error('module %s did not export a function');" % (varName, moduleName, varName, moduleName)
+        
 #-------------------------------------------------------------------------------
 Directive.classes.extend([
     DirectiveClass,
@@ -539,11 +554,12 @@ Directive.classes.extend([
     DirectiveSetter,
     DirectiveFunction,
     DirectiveStatic,
+    DirectiveInit,
     DirectiveRequire,
+    DirectiveRequireClass,
+    DirectiveRequireFunction,
 ])
 
-#-------------------------------------------------------------------------------
-#
 #-------------------------------------------------------------------------------
 def parseArgs():
     usage        = "usage: %s [options] FILE FILE ..." % PROGRAM
@@ -577,15 +593,11 @@ def parseArgs():
     return (options, args)
     
 #-------------------------------------------------------------------------------
-#
-#-------------------------------------------------------------------------------
 def verbose(message):
     if not Options.verbose: return
     
     print "%s: %s" % (PROGRAM, message)
 
-#-------------------------------------------------------------------------------
-#
 #-------------------------------------------------------------------------------
 def log(message):
     if Options.quiet: return
@@ -593,23 +605,18 @@ def log(message):
     print "%s: %s" % (PROGRAM, message)
 
 #-------------------------------------------------------------------------------
-#
+def logFile(fileName, lineNo, message):
+    log("%s:%d: %s" % (fileName, lineNo, message))
+
 #-------------------------------------------------------------------------------
 def error(message):
     print "%s: %s" % (PROGRAM, message)
     exit(1)
 
 #-------------------------------------------------------------------------------
-#
-#-------------------------------------------------------------------------------
-def errorException(message):
-    eType  = str(sys.exc_info()[0])
-    eValue = str(sys.exc_info()[1])
-    
-    error("%s; exception: %s: %s" % (message, eType, eValue))
+def errorFile(fileName, lineNo, message):
+    error("%s:%d: %s" % (fileName, lineNo, message))
 
-#-------------------------------------------------------------------------------
-#
 #-------------------------------------------------------------------------------
 def getHelp():
     return """
@@ -620,8 +627,6 @@ root for it's contained .scoop files (the directory name FILE is
 not part of the module name.
     """.strip()
 
-#-------------------------------------------------------------------------------
-#
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':
     main()

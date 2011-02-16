@@ -5,7 +5,7 @@
 // http://www.opensource.org/licenses/mit-license.php
 //-----------------------------------------------------------------------------
 
-require ./Point3 as Point_3
+requireClass ./Point3 as Point_3
 
 //----------------------------------------------------------------------------
 class Point4(properties) < Point_3

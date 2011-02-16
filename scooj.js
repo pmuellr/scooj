@@ -22,8 +22,6 @@ scooj._classes        = {}
 scooj._currentClass   = {}
 
 //----------------------------------------------------------------------------
-// 
-//----------------------------------------------------------------------------
 addExport(function defClass(module, superclass, func) {
     if (null == module) {
         throw new Error("must pass a module as the first parameter")
@@ -88,8 +86,6 @@ addExport(function defClass(module, superclass, func) {
 })
 
 //----------------------------------------------------------------------------
-// class mixin - copy functions in mixinObject into prototype
-//----------------------------------------------------------------------------
 addExport(function useMixin(module, mixinObject) {
     var klass = ensureClassCurrentlyDefined(module)
 
@@ -120,14 +116,10 @@ addExport(function useMixin(module, mixinObject) {
 })
 
 //----------------------------------------------------------------------------
-// 
-//----------------------------------------------------------------------------
 addExport(function endClass() {
     console.log("scooj.endClass() is deprecated")
 })
 
-//----------------------------------------------------------------------------
-// method/accessor definers
 //----------------------------------------------------------------------------
 addExport(function defMethod(module, func)       {return addMethod(module, func, false, false, false)})
 addExport(function defStaticMethod(module, func) {return addMethod(module, func, true,  false, false)})
@@ -137,16 +129,12 @@ addExport(function defStaticGetter(module, func) {return addMethod(module, func,
 addExport(function defStaticSetter(module, func) {return addMethod(module, func, true,  false, true)})
 
 //----------------------------------------------------------------------------
-// return a super invoker
-//----------------------------------------------------------------------------
 addExport(function defSuper(module) {
     var klass = ensureClassCurrentlyDefined(module)
 
     return getSuperMethod(klass)
 })
 
-//----------------------------------------------------------------------------
-// install scooj functions as globals
 //----------------------------------------------------------------------------
 var globalsInstalled = false
 
@@ -180,11 +168,7 @@ addExport(function installGlobals() {
 
 
 //============================================================================
-// utilities
-//============================================================================
 
-//----------------------------------------------------------------------------
-// return a new $super method
 //----------------------------------------------------------------------------
 function getSuperMethod(owningClass) {
     var superclass = owningClass._scooj.superclass
@@ -202,8 +186,6 @@ function getSuperMethod(owningClass) {
     }
 }
 
-//----------------------------------------------------------------------------
-// add a method to a class
 //----------------------------------------------------------------------------
 function addMethod(module, func, isStatic, isGetter, isSetter) {
     var funcName = ensureNamedFunction(func)
@@ -269,8 +251,6 @@ function addMethod(module, func, isStatic, isGetter, isSetter) {
 }
 
 //----------------------------------------------------------------------------
-// ensure parameter is a named function
-//----------------------------------------------------------------------------
 function ensureNamedFunction(func) {
     if (typeof func != "function") throw new Error("expecting a function: " + func)
     
@@ -284,8 +264,6 @@ function ensureNamedFunction(func) {
 }
 
 //----------------------------------------------------------------------------
-// ensure a class is currently defined
-//----------------------------------------------------------------------------
 function ensureClassCurrentlyDefined(module) {
     if (!scooj._currentClass[module.id]) throw new Error("no class currently defined")
     
@@ -293,16 +271,12 @@ function ensureClassCurrentlyDefined(module) {
 }
 
 //----------------------------------------------------------------------------
-// export a function
-//----------------------------------------------------------------------------
 function addExport(func) {
     var funcName = ensureNamedFunction(func)
     
     exports[funcName] = func
 }
 
-//----------------------------------------------------------------------------
-// get the "global" object
 //----------------------------------------------------------------------------
 function getGlobalObject() {
     var globalObject = null

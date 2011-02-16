@@ -9,8 +9,7 @@
 class TestMixins
 
 //----------------------------------------------------------------------------
-static 
-
+init
     var SomeOtherFunctions = {
         a: function a() { return "a" },
         b: function  () { return "b" }
@@ -45,7 +44,7 @@ class AMixinUser
 mixin AMixin
 
 //----------------------------------------------------------------------------
-static
+init
     TestMixins.runTests()
     
     console.log("Mixins tests pass")    
