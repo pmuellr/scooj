@@ -1,91 +1,31 @@
+-------------------------------------------------------------------------------
 scooj - Simple Classical OO for JavaScript
 ===============================================================================
 
-Despite the ongoing hate for the "pseudo-classical" object oriented
-class definition style in JavaScript from all the kewl kids, one of my
+The "pseudo-classical" object oriented class definition style in JavaScript 
+seems to be dismissed by all the kewl JavaScript folk, but one of my
 thoughts is that JavaScript actual needs some order brought to it, for
 today's JavaScript mega-programs.  Because there is no order, and
 programs become as maintainable as BASICA programs of yore. CommonJS
 modules help some - they can help you keep your large chunks of code
 better organized.  But I yearn for classic OO.  This is an experiment.
 
-scooj is designed to run in a CommonJS module system.  If you need
+**`scooj`** is designed to run in a CommonJS module system.  If you need
 a CommonJS module system for a browser, look at 
 [modjewel](https://github.com/pmuellr/modjewel). 
 
-scooj is a JavaScript library that let's you define "classes" that have
+**`scooj`** is a JavaScript library that let's you define "classes" that have
 instance methods and static methods.  Classes can have superclasses, and
-a real super method invocation is available, though it's still kinda clunky.
+a real super method invocation is available.
 
 See the included tests for some basic use cases.
 
-Usage
+Beyond that description, you probably won't be using the **`scooj`** module
+directly.  Instead, you'll author your classes in `.scoop` files, which you
+compile into JavaScript source files with the `scoopc.py` compiler.
+
+
 -------------------------------------------------------------------------------
-
-        var scooj = require("scooj") // or wherever you load it from
-
-To keep your code a little cleaner, you can install the most useful functions
-in scooj as global functions.  This works at least with node.js and modjewel.
-
-Installing the scooj functions as globals is done by:
-
-        scooj.installGlobals()
-    
-I suppose that's evil, but if you're working in a closed system, it makes life
-easier.
-
-Functions defined
--------------------------------------------------------------------------------
-
-Note that all the functions passed to scooj functions should be named; this
-is how the features are actually named, and it makes debugging nice because
-your functions will no longer be anonymous.
-
-**scooj.defClass(module, [superclass,] constructorFunction)**
-
-Defines a new class.  If subclassing an existing class, specify that
-class as the second parameter.  The constructorFunction will be the
-constructor for the class.  The module parameter is the current CommonJS
-module.
-
-All functions executed after this function is executed will be added to this
-class.
-
-**scooj.defStaticMethod(methodFunction)**
-
-Define a static method on the current class.
-
-**scooj.defMethod(methodFunction)**
-
-Define an instance method on the current class.
-
-**scooj.defSuper()**
-
-Returns a function which performs super invocation.  The super
-function should be invoked with the following parameters:
-
-* the receiver (should be `this`) 
-* the method name to be invoked 
-* any parameters to be passed to the method
-
-To make a super call on a constructor, pass null as the method name.
-
-Example
--------------------------------------------------------------------------------
-
-The file [Animals.js](scooj/blob/master/test-cases/scooj/Animals.js) contains a translation of the
-[OO CoffeeScript example](http://jashkenas.github.com/coffee-script/#classes).
-
-In scooj's defense:
-
-* you wouldn't normally be defining more than one class in a file
-* you wouldn't be using super so much
-* you likely would never have to reference your own class directly, and
-  thus not need the assignment of the **defClass()** invocation.
-
-The file [RunTests.js](scooj/blob/master/test-cases/scooj/RunTests.js) is more the flavor I write
-in.
-
 scoopc.py - scooj compiler
 ===============================================================================
 
@@ -97,7 +37,7 @@ scoopc is designed to fix that.  It's a "compiler" which takes files consisting
 of JavaScript code prefixed with "directive lines", and generates new 
 JavaScript files.  The "directive lines" are lines in the file which are used
 to declare methods, classes, etc.  See the file 
-[Animals.scoop](scooj/blob/master/test-cases/scoop/Animals.scoop) for an example of a
+[Animals.scoop](https://github.com/pmuellr/scooj/blob/master/test-cases/scoop/Animals.scoop) for an example of a
 .scoop file.
 
 Generally, directives are used to define functions.  You specify the
@@ -111,33 +51,50 @@ have the same line structure as the original scoop file.  If you have syntax
 errors in your JavaScript file, you won't have to guess at what line number
 the problem is back in the scoop file - it'll be the same line.
 
-scoop directives:
+Enjoy brace-, bracket-, and comma-free class defining!
+
+-------------------------------------------------------------------------------
+scoop directive - `class`
 -------------------------------------------------------------------------------
 
-**class _className_**<br>
-**class _className_ \(_parameter list_\)**<br>
-**class _className_ < _superclassName_**<br>
-**class _className_ \(_parameter list_\) < _superclassName_**<br>
+<pre>
+<b>class</b> <i>className</i>
+<b>class</b> <i>className</i> (<i>parameter list</i>)
+<b>class</b> <i>className</i> &lt; <i>superclassName</i>
+<b>class</b> <i>className</i> (<i>parameter list</i>) < <i>superclassName</i>
+</pre>
 
-The class directive defines a new class.  It can optionally define a parameter 
+The `class` directive defines a new class.  It can optionally define a parameter 
 list for the constructor, and a superclass.
 
 The JavaScript code following this directive becomes 
 the body of the constructor function for the class.
 
-**static method _methodName_**<br>
-**static method _methodName_ \(_parameter list_\)**<br>
+-------------------------------------------------------------------------------
+scoop directive - `static method`
+-------------------------------------------------------------------------------
 
-The static method directive defines a new static method on the previously
+<pre>
+<b>static method</b> <i>methodName</i>
+<b>static method</b> <i>methodName</i> (<i>parameter list</i>)
+</pre>
+
+The `static method` directive defines a new static method on the previously
 defined class.
 It can optionally define a parameter list for the method.
 
 The JavaScript code following this directive becomes 
 the body of the static method.
 
-**static getter _propertyName_**<br>
+-------------------------------------------------------------------------------
+scoop directive - `static getter`
+-------------------------------------------------------------------------------
 
-The static getter directive defines a property getter for the previously
+<pre>
+<b>static getter</b> <i>propertyName</i>
+</pre>
+
+The `static getter` directive defines a property getter for the previously
 defined class.
 
 The JavaScript code following this directive becomes 
@@ -146,9 +103,15 @@ the body of the getter function for the property.
 Note that this directive generates code that makes use of the 
 ECMAScript 5 property accessor APIs.
 
-**static setter _propertyName_ \(_parameter list_\)**<br>
+-------------------------------------------------------------------------------
+scoop directive - `static setter`
+-------------------------------------------------------------------------------
 
-The static setter directive defines a property setter for the previously
+<pre>
+<b>static setter</b> <i>propertyName</i> (<i>parameter list</i>)
+</pre>
+
+The `static setter` directive defines a property setter for the previously
 defined class.
 
 The JavaScript code following this directive becomes 
@@ -157,19 +120,31 @@ the body of the setter function for the property.
 Note that this directive generates code that makes use of the 
 ECMAScript 5 property accessor APIs.
 
-**method**<br>
-**method \(_parameter list_\)**<br>
+-------------------------------------------------------------------------------
+scoop directive - `method`
+-------------------------------------------------------------------------------
 
-The method directive defines an instance method for the previously defined
+<pre>
+<b>method</b>
+<b>method</b> (<i>parameter list</i>)
+</pre>
+
+The `method` directive defines an instance method for the previously defined
 class.
 It can optionally define a parameter list for the method.
 
 The JavaScript code following this directive becomes 
 the body of the method.
 
-**getter _propertyName_**<br>
+-------------------------------------------------------------------------------
+scoop directive - `getter`
+-------------------------------------------------------------------------------
 
-The getter directive defines a property getter for instances of the previously
+<pre>
+<b>getter</b> <i>propertyName</i>
+</pre>
+
+The `getter` directive defines a property getter for instances of the previously
 defined class.
 
 The JavaScript code following this directive becomes 
@@ -179,9 +154,15 @@ Note that this directive generates code that makes use of the
 ECMAScript 5 property accessor APIs.
 
 
-**setter _propertyName_ \(_parameter list_\)**<br>
+-------------------------------------------------------------------------------
+scoop directive - `setter`
+-------------------------------------------------------------------------------
 
-The setter directive defines a property setter for instances of the previously
+<pre>
+<b>setter</b> <i>propertyName</i> (<i>parameter list</i>)
+</pre>
+
+The `setter` directive defines a property setter for instances of the previously
 defined class.
 
 The JavaScript code following this directive becomes 
@@ -190,33 +171,86 @@ the body of the setter function for the property.
 Note that this directive generates code that makes use of the 
 ECMAScript 5 property accessor APIs.
 
-**static**<br>
+-------------------------------------------------------------------------------
+scoop directive - `init`
+-------------------------------------------------------------------------------
+
+<pre>
+<b>init</b>
+</pre>
 
 The JavaScript code following this directive is left
 unadorned in the resulting JavaScript file. It's similar to
 Java's static initializer blocks.
 
-**function**<br>
-**function \(_parameter list_\)**<br>
+-------------------------------------------------------------------------------
+scoop directive - `function`
+-------------------------------------------------------------------------------
 
-The function directive defines a function defined globally within the
+<pre>
+<b>function</b>
+<b>function</b> (<i>parameter list</i>)
+</pre>
+
+The `function` directive defines a function defined globally within the
 module's scope.
 It can optionally define a parameter list for the function.
 
 The JavaScript code following this directive becomes 
 the body of the function.
 
-**require _moduleName_**<br>
-**require _moduleName_ as _variableName_**<br>
+-------------------------------------------------------------------------------
+scoop directive - `require`
+-------------------------------------------------------------------------------
 
-The require directive is used to generate a require() function within the
+<pre>
+<b>require <i>moduleName</i></b><br>
+<b>require <i>moduleName</i> as <i>variableName</i></b><br>
+</pre>
+
+The `require` directive is used to generate a `require()` function within the
 module.  The specified module is assigned to a variable name which
 is the _basename_ of the moduleName.  Optionally, you may specify the
 variable name which gets used by using the _as_ form.
 
 The JavaScript code following this directive not otherwise processed.
 
+-------------------------------------------------------------------------------
+scoop directive - `requireClass`
+-------------------------------------------------------------------------------
 
+<pre>
+<b>requireClass <i>moduleName</i></b><br>
+<b>requireClass <i>moduleName</i> as <i>variableName</i></b><br>
+</pre>
+
+Same as the `require` directive, but `getClass()` is called on the
+object returned from the `require()` function, which is presumably
+the first class defined in the scoop module.
+
+
+-------------------------------------------------------------------------------
+Running the `scoopc.py` compiler
+===============================================================================
+
+The command line for `scoopc.py` is as follows:
+
+    scoopc.py [options] FILE FILE ...
+
+`scoopc.py` converts `.scoop` files to `.js` files.  `FILE` can be a `.scoop` 
+file or a directory
+of `.scoop` files.  Each `.scoop` file is converted to a  root module, and each
+directory of `.scoop` files is considered a root for it's contained `.scoop` files
+(the directory name `FILE` is not part of the module name.
+    
+Options:
+    --version          show program's version number and exit
+    -h, --help         show this help message and exit
+    -o DIR, --out=DIR  generate .js files in DIR (default: .)
+    -q, --quiet        be quiet
+    -v, --verbose      be noisy
+
+-------------------------------------------------------------------------------
 Copyright / License
 ===============================================================================
 

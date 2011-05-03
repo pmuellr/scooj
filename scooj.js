@@ -17,7 +17,7 @@ if (typeof exports == "undefined") {
 //----------------------------------------------------------------------------
 var scooj = {}
 scooj.version         = "1.1.0"
-scooj._global         = getGlobalObject()
+scooj._global         = getGlobalObject(this)
 scooj._classes        = {}
 scooj._currentClass   = {}
 
@@ -77,9 +77,12 @@ addExport(function defClass(module, superclass, func) {
     func.$super = getSuperMethod(func)
 
     // export the first class defined in a module
-    if (typeof(module.exports) != "function") {
+    // as result of the exported getClass() function
+    if (typeof(module.exports.getClass) != "function") {
         func.signature = module.id + "()"
-        module.exports = func
+        module.exports.getClass = function getClass() {
+            return func
+        }
     }
     
     return func
@@ -116,11 +119,6 @@ addExport(function useMixin(module, mixinObject) {
 })
 
 //----------------------------------------------------------------------------
-addExport(function endClass() {
-    console.log("scooj.endClass() is deprecated")
-})
-
-//----------------------------------------------------------------------------
 addExport(function defMethod(module, func)       {return addMethod(module, func, false, false, false)})
 addExport(function defStaticMethod(module, func) {return addMethod(module, func, true,  false, false)})
 addExport(function defGetter(module, func)       {return addMethod(module, func, false, true,  false)})
@@ -147,8 +145,7 @@ addExport(function installGlobals() {
         "defSetter",
         "defStaticGetter",
         "defStaticSetter",
-        "defSuper",
-        "endClass",
+        "defSuper"
     ]
 
     if (globalsInstalled) return
@@ -278,18 +275,16 @@ function addExport(func) {
 }
 
 //----------------------------------------------------------------------------
-function getGlobalObject() {
-    var globalObject = null
-
+function getGlobalObject(theGlobal) {
     // running in a browser?
     if (typeof window != "undefined") {
-        globalObject = window
+        theGlobal = window
     }
 
     // running in node.js?
     else if (typeof global != "undefined") {
-        globalObject = global
+        theGlobal = global
     }
 
-    return globalObject
+    return theGlobal
 }

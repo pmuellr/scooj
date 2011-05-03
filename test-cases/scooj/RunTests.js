@@ -7,10 +7,10 @@
 
 require("scooj").installGlobals()
 
-var TestSuite = require("../unit-test/TestSuite")
-var Point2    = require("./Point2")
-var Point3    = require("./Point3")
-var Point4    = require("./Point4")
+var TestSuite = require("../unit-test/TestSuite").getClass()
+var Point2    = require("./Point2").getClass()
+var Point3    = require("./Point3").getClass()
+var Point4    = require("./Point4").getClass()
 
 //----------------------------------------------------------------------------
 defClass(module, TestSuite, function RunTests(){

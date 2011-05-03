@@ -8,11 +8,11 @@
 var scooj = require("scooj")
 scooj.installGlobals()
 
-var TestRunner = require("./unit-test/TestRunner")
+var TestRunner = require("./unit-test/TestRunner").getClass()
 
 console.log("-------- running scooj tests ---------------")
 
-var RunTests   = require("./scooj/RunTests")
+var RunTests   = require("./scooj/RunTests").getClass()
 
 var testRunner = new TestRunner()
 testRunner.addTestSuite(RunTests)
@@ -23,15 +23,15 @@ var animals = require("./scooj/Animals")
 
 console.log("-------- running scoop tests ---------------")
 
-var RunTests   = require("./scoop/RunTests")
+var RunTests   = require("./scoop/RunTests").getClass()
 
 var testRunner = new TestRunner()
 testRunner.addTestSuite(RunTests)
 var results = testRunner.run()
 TestRunner.resultsToConsole("RunTests", results)
 
-var animals = require("./scoop/Animals")
+var animals = require("./scoop/Animals").getClass()
 
-require("./scoop/Etc").runTests()
+require("./scoop/Etc").getClass().runTests()
 require("./scoop/Mixins")
 

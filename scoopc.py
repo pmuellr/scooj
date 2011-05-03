@@ -522,26 +522,8 @@ class DirectiveRequireClass(Directive):
 
         if not varName: varName = os.path.basename(moduleName)
 
-        self.line = "var %s = require('%s'); if (typeof %s != 'function') throw Error('module %s did not export a class');" % (varName, moduleName, varName, moduleName)
+        self.line = "var %s = require('%s').getClass(); if (typeof %s != 'function') throw Error('module %s did not export a class');" % (varName, moduleName, varName, moduleName)
 
-#-------------------------------------------------------------------------------
-class DirectiveRequireFunction(Directive):
-
-    matchPattern = re.compile("^requireFunction\s+([\w$\.\-/]+)(\s+as\s+([\w$.-]+))?\s*$")
-
-    #---------------------------------------------------------------------------
-    def __init__(self, fileName, line, lineNo, match):
-        Directive.__init__(self, fileName, line, lineNo, match)
-
-    #---------------------------------------------------------------------------
-    def compile(self):
-        moduleName = self.match.group(1)
-        varName    = self.match.group(3)
-
-        if not varName: varName = os.path.basename(moduleName)
-
-        self.line = "var %s = require('%s'); if (typeof %s != 'function') throw Error('module %s did not export a function');" % (varName, moduleName, varName, moduleName)
-        
 #-------------------------------------------------------------------------------
 Directive.classes.extend([
     DirectiveClass,
@@ -556,8 +538,7 @@ Directive.classes.extend([
     DirectiveStatic,
     DirectiveInit,
     DirectiveRequire,
-    DirectiveRequireClass,
-    DirectiveRequireFunction,
+    DirectiveRequireClass
 ])
 
 #-------------------------------------------------------------------------------

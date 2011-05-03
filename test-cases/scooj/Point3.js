@@ -7,7 +7,7 @@
 
 require("scooj").installGlobals()
 
-var Point2 = require("./Point2")
+var Point2 = require("./Point2").getClass()
 
 //----------------------------------------------------------------------------
 defClass(module, Point2, function Point3(properties) {
