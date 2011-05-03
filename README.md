@@ -1,4 +1,3 @@
-
 scooj - Simple Classical OO for JavaScript
 ===============================================================================
 
@@ -231,6 +230,7 @@ Running the scoopc.py compiler
 ===============================================================================
 
 The command line for `scoopc.py` is as follows:
+
 ```
 scoopc.py [options] FILE FILE ...
 ```
@@ -242,6 +242,7 @@ directory of `.scoop` files is considered a root for it's contained `.scoop` fil
 (the directory name `FILE` is not part of the module name.
     
 Options:
+
 ```
 --version          show program's version number and exit
 -h, --help         show this help message and exit
