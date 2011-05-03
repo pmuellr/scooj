@@ -1,4 +1,4 @@
--------------------------------------------------------------------------------
+<!-- ====================================================================== -->
 scooj - Simple Classical OO for JavaScript
 ===============================================================================
 
@@ -25,7 +25,7 @@ directly.  Instead, you'll author your classes in `.scoop` files, which you
 compile into JavaScript source files with the `scoopc.py` compiler.
 
 
--------------------------------------------------------------------------------
+<!-- ====================================================================== -->
 scoopc.py - scooj compiler
 ===============================================================================
 
@@ -53,7 +53,8 @@ the problem is back in the scoop file - it'll be the same line.
 
 Enjoy brace-, bracket-, and comma-free class defining!
 
--------------------------------------------------------------------------------
+
+<!-- ====================================================================== -->
 scoop directive - `class`
 -------------------------------------------------------------------------------
 
@@ -70,7 +71,7 @@ list for the constructor, and a superclass.
 The JavaScript code following this directive becomes 
 the body of the constructor function for the class.
 
--------------------------------------------------------------------------------
+<!-- ====================================================================== -->
 scoop directive - `static method`
 -------------------------------------------------------------------------------
 
@@ -86,7 +87,7 @@ It can optionally define a parameter list for the method.
 The JavaScript code following this directive becomes 
 the body of the static method.
 
--------------------------------------------------------------------------------
+<!-- ====================================================================== -->
 scoop directive - `static getter`
 -------------------------------------------------------------------------------
 
@@ -103,7 +104,7 @@ the body of the getter function for the property.
 Note that this directive generates code that makes use of the 
 ECMAScript 5 property accessor APIs.
 
--------------------------------------------------------------------------------
+<!-- ====================================================================== -->
 scoop directive - `static setter`
 -------------------------------------------------------------------------------
 
@@ -120,7 +121,7 @@ the body of the setter function for the property.
 Note that this directive generates code that makes use of the 
 ECMAScript 5 property accessor APIs.
 
--------------------------------------------------------------------------------
+<!-- ====================================================================== -->
 scoop directive - `method`
 -------------------------------------------------------------------------------
 
@@ -136,7 +137,7 @@ It can optionally define a parameter list for the method.
 The JavaScript code following this directive becomes 
 the body of the method.
 
--------------------------------------------------------------------------------
+<!-- ====================================================================== -->
 scoop directive - `getter`
 -------------------------------------------------------------------------------
 
@@ -153,8 +154,7 @@ the body of the getter function for the property.
 Note that this directive generates code that makes use of the 
 ECMAScript 5 property accessor APIs.
 
-
--------------------------------------------------------------------------------
+<!-- ====================================================================== -->
 scoop directive - `setter`
 -------------------------------------------------------------------------------
 
@@ -171,7 +171,7 @@ the body of the setter function for the property.
 Note that this directive generates code that makes use of the 
 ECMAScript 5 property accessor APIs.
 
--------------------------------------------------------------------------------
+<!-- ====================================================================== -->
 scoop directive - `init`
 -------------------------------------------------------------------------------
 
@@ -183,7 +183,7 @@ The JavaScript code following this directive is left
 unadorned in the resulting JavaScript file. It's similar to
 Java's static initializer blocks.
 
--------------------------------------------------------------------------------
+<!-- ====================================================================== -->
 scoop directive - `function`
 -------------------------------------------------------------------------------
 
@@ -199,7 +199,7 @@ It can optionally define a parameter list for the function.
 The JavaScript code following this directive becomes 
 the body of the function.
 
--------------------------------------------------------------------------------
+<!-- ====================================================================== -->
 scoop directive - `require`
 -------------------------------------------------------------------------------
 
@@ -215,7 +215,7 @@ variable name which gets used by using the _as_ form.
 
 The JavaScript code following this directive not otherwise processed.
 
--------------------------------------------------------------------------------
+<!-- ====================================================================== -->
 scoop directive - `requireClass`
 -------------------------------------------------------------------------------
 
@@ -229,7 +229,7 @@ object returned from the `require()` function, which is presumably
 the first class defined in the scoop module.
 
 
--------------------------------------------------------------------------------
+<!-- ====================================================================== -->
 Running the `scoopc.py` compiler
 ===============================================================================
 
@@ -250,7 +250,8 @@ Options:
     -q, --quiet        be quiet
     -v, --verbose      be noisy
 
--------------------------------------------------------------------------------
+
+<!-- ====================================================================== -->
 Copyright / License
 ===============================================================================
 
