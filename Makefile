@@ -38,6 +38,12 @@ test-modjewel:
 	@echo To run modjewel tests, open HTML file tmp/run-tests.html and check the console
 
 #-------------------------------------------------------------------------------
+get-prereqs:
+	-rm -rf node_modules
+	mkdir node_modules
+	cd node_modules; npm install directive
+
+#-------------------------------------------------------------------------------
 clean:
 	rm -rf tmp
 

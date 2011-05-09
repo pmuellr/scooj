@@ -1,0 +1,150 @@
+#!/usr/bin/env node
+
+scoopc    = require("../scoopc")
+fs        = require("fs")
+path      = require("path")
+
+PROGRAM = path.basename(process.argv[1])
+VERSION = "1.1.0"
+
+ExtensionScoop      = ".scoop"
+ExtensionJavaScript = ".js"
+
+args    = []
+options = {}
+parseArgs(args, options)
+
+args.forEach(function(arg) {
+    if (!path.existsSync(arg)) {
+        log("path does not exist: '" + arg + "'")
+        return
+    }
+ 
+    processEntry(arg, [], options)
+})
+
+//--------------------------------------------------------------------
+function processEntry(name, path, options) {
+    var fileName = getFileName(name, path)
+    var stats = fs.lstatSync(fileName)
+    
+    if (stats.isFile()) {
+        if (!/\.scoop$/.test(name)) return
+        processFile(name, path, options)
+    }
+    else {
+        processDir(name, path, options)
+    }
+}
+
+//--------------------------------------------------------------------
+function processFile(name, path, options) {
+    iFileName = getFileName(name, path)
+    oFileName = getFileName(name, path, options.dirName)
+
+    var source = fs.readFileSync(iFileName, "utf8")
+    scoopc.compile(source, iFileName)
+    
+    console.log("process: " + iFileName + " -> " + oFileName)
+}
+
+//--------------------------------------------------------------------
+function processDir(name, path, options) {
+    var entries = fs.readdirSync(getFileName(name, path))
+    
+    path.push(name)
+    entries.forEach(function(file) {
+        processEntry(file, path, options)
+    })
+    path.pop()
+}
+
+
+//--------------------------------------------------------------------
+function getFileName(name, path, prefix) {
+    prefix = prefix || ""
+    if (prefix != "") prefix += "/"
+    
+    path = path.join("/") 
+    if (path != "") path += "/"
+    
+    return prefix + path + name
+}
+
+//--------------------------------------------------------------------
+function parseArgs(args, options) {
+
+    var argv = process.argv.slice(2)
+    if (!argv.length) help()
+    
+    options.dirName = "."
+    
+    while (argv.length) {
+        var arg = argv.shift()
+        
+        if (arg[0] != "-") {
+            args.push(arg)
+            continue
+        }
+        
+        if (arg == "--version")  {
+            console.log(PROGRAM + " " + VERSION)
+            process.exit(1)
+        }
+        
+        if (["-q", "--quiet"].indexOf(arg) >= 0)  {
+            options.quiet = true
+            continue
+        }
+        
+        if (["-v", "--verbose"].indexOf(arg) >= 0)  {
+            options.verbose = true
+            continue
+        }
+        
+        if (["-o", "--out"].indexOf(arg) >= 0)  {
+            options.dirName = argv.shift()
+            if (!options.dirName) {
+                error("the option " + option + " requires a parameter")
+            }
+            continue
+        }
+        
+        if (["-?", "--?", "-h", "--help"].indexOf(arg) >= 0) {
+            help()
+        }
+        
+        error("invalid option specified: " + arg)
+    }
+}
+
+//--------------------------------------------------------------------
+function help() {
+    console.log("Usage: " + PROGRAM + " [options] FILE FILE ...")
+    console.log("")
+    console.log("Converts .scoop files to .js files.  FILE can be a .scoop file or")
+    console.log("a directory of .scoop files.  Each .scoop file is converted to a")
+    console.log("root module, and each directory of .scoop files is considered a")
+    console.log("root for it's contained .scoop files (the directory name FILE is")
+    console.log("not part of the module name.")
+    console.log()
+    console.log("Options:")
+    console.log("  --version          show program's version number and exit")
+    console.log("  -h, --help         show this help message and exit")
+    console.log("  -o DIR, --out=DIR  generate .js files in DIR (default: .)")
+    console.log("  -q, --quiet        be quiet")
+    console.log("  -v, --verbose      be noisy")
+    
+    process.exit(1)
+}
+
+//--------------------------------------------------------------------
+function log(message) {
+    process.stderr.write(PROGRAM + ": " + message)
+}
+
+//--------------------------------------------------------------------
+function error(message) {
+    log(message)
+    process.exit(1)
+}
