@@ -119,12 +119,42 @@ addExport(function useMixin(module, mixinObject) {
 })
 
 //----------------------------------------------------------------------------
-addExport(function defMethod(module, func)       {return addMethod(module, func, false, false, false)})
-addExport(function defStaticMethod(module, func) {return addMethod(module, func, true,  false, false)})
-addExport(function defGetter(module, func)       {return addMethod(module, func, false, true,  false)})
-addExport(function defSetter(module, func)       {return addMethod(module, func, false, false, true)})
-addExport(function defStaticGetter(module, func) {return addMethod(module, func, true,  true,  false)})
-addExport(function defStaticSetter(module, func) {return addMethod(module, func, true,  false, true)})
+addExport(function defMethod(module, options, func) {
+    if ((func == null) && (typeof(options) == "function")) {
+        func    = options
+        options = {}
+    }
+    return addMethod(module, func, false, false, false, options)
+})
+
+addExport(function defStaticMethod(module, options, func) {
+    if ((func == null) && (typeof(options) == "function")) {
+        func    = options
+        options = {}
+    }
+    return addMethod(module, func, true,  false, false, options)
+})
+
+addExport(function defGetter(module, func)                {return addMethod(module, func, false, true,  false, {})})
+addExport(function defSetter(module, func)                {return addMethod(module, func, false, false, true,  {})})
+addExport(function defStaticGetter(module, func)          {return addMethod(module, func, true,  true,  false, {})})
+addExport(function defStaticSetter(module, func)          {return addMethod(module, func, true,  false, true,  {})})
+
+//----------------------------------------------------------------------------
+addExport(function bindMethods(object) {
+
+    var ctor = object && object.constructor
+    if (!ctor) return
+    
+    var methods = ctor._scooj && ctor._scooj.methods
+    if (!methods) return
+    
+    for (var methodName in methods) {
+        var method = methods[methodName]
+        
+        object[methodName] =  method.bind(object)
+    }
+})
 
 //----------------------------------------------------------------------------
 addExport(function defSuper(module) {
@@ -184,7 +214,7 @@ function getSuperMethod(owningClass) {
 }
 
 //----------------------------------------------------------------------------
-function addMethod(module, func, isStatic, isGetter, isSetter) {
+function addMethod(module, func, isStatic, isGetter, isSetter, options) {
     var funcName = ensureNamedFunction(func)
     var klass = ensureClassCurrentlyDefined(module)
     
@@ -220,6 +250,7 @@ function addMethod(module, func, isStatic, isGetter, isSetter) {
     func._scooj.isStatic    = isStatic
     func._scooj.isGetter    = isGetter
     func._scooj.isSetter    = isSetter
+    func._scooj.isBound     = options.bind
 
     func.signature   = module.id + "." + funcName + "()"
     func.displayName = func._scooj.signature
@@ -232,7 +263,12 @@ function addMethod(module, func, isStatic, isGetter, isSetter) {
     	else if (isSetter)
     		klass.__defineSetter__(funcName, func)
     	else 
-    		klass[funcName] = func
+    		if (options.bind) {
+    		    klass[funcName] = func.bind(klass)
+    		}
+    		else {
+        		klass[funcName] = func
+    		}
     }
     
     else {
@@ -287,4 +323,27 @@ function getGlobalObject(theGlobal) {
     }
 
     return theGlobal
+}
+
+//----------------------------------------------------------------------------
+// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Function/bind
+//----------------------------------------------------------------------------
+if ( !Function.prototype.bind ) {
+
+  Function.prototype.bind = function( obj ) {
+    var slice = [].slice,
+        args = slice.call(arguments, 1), 
+        self = this, 
+        nop = function () {}, 
+        bound = function () {
+          return self.apply( this instanceof nop ? this : ( obj || {} ), 
+                              args.concat( slice.call(arguments) ) );    
+        };
+
+    nop.prototype = self.prototype;
+
+    bound.prototype = new nop();
+
+    return bound;
+  };
 }

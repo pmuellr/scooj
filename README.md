@@ -73,8 +73,8 @@ scoop directive - static method
 -------------------------------------------------------------------------------
 
 <pre>
-<b>static method</b> <i>methodName</i>
-<b>static method</b> <i>methodName</i> (<i>parameter list</i>)
+<b>static (bind)? method</b> <i>methodName</i>
+<b>static (bind)? method</b> <i>methodName</i> (<i>parameter list</i>)
 </pre>
 
 The `static method` directive defines a new static method on the previously
@@ -83,6 +83,9 @@ It can optionally define a parameter list for the method.
 
 The JavaScript code following this directive becomes 
 the body of the static method.
+
+The token `bind` can precede the `method` token, indicating this is a bound
+method.
 
 
 scoop directive - static getter
@@ -123,8 +126,8 @@ scoop directive - method
 -------------------------------------------------------------------------------
 
 <pre>
-<b>method</b>
-<b>method</b> (<i>parameter list</i>)
+<b>(bind)? method</b>
+<b>(bind)? method</b> (<i>parameter list</i>)
 </pre>
 
 The `method` directive defines an instance method for the previously defined
@@ -134,6 +137,8 @@ It can optionally define a parameter list for the method.
 The JavaScript code following this directive becomes 
 the body of the method.
 
+The token `bind` can precede the `method` token, indicating this is a bound
+method.
 
 scoop directive - getter
 -------------------------------------------------------------------------------
@@ -224,6 +229,56 @@ scoop directive - requireClass
 Same as the `require` directive, but `getClass()` is called on the
 object returned from the `require()` function, which is presumably
 the first class defined in the scoop module.
+
+
+Bound methods
+===============================================================================
+
+Using `bind` in a method directive indicates the method is to be bound.
+
+For static methods, invocation of the method will always result in `this`
+being set to the class.
+
+For non-static methods, invocation of the method will always result in `this`
+being set to the instance of the class the method was referenced through.
+
+The use case for bound methods is callbacks, where you are likely to 
+want to bind methods to `this` anyway.  Let scoop do it for you!
+
+super calls
+===============================================================================
+
+The only modification of your code that will be performed is for `super` calls.
+
+Text sequences within the source of method `methodName` of the form
+
+```
+super(...)
+```
+
+are changed into:
+
+<pre>
+<i>className</i>.$super(this, "<i>methodName</i>", ...)
+</pre>
+
+Text sequences of 
+
+```
+super.methodName(..)
+```
+
+are changed into:
+
+<pre>
+<i>className</i>.$super(this, "<i>methodName</i>", ...)
+</pre>
+
+The static method `$super` is automatically defined for every class.
+It takes an object instance and method name as initial parameters.  Given 
+the method name, the method to invoke is determined, and then called with
+the instance parameter as `this` and any other parameters passed in the
+`$super()` invocation as parameters.
 
 
 Running the scoopc.py compiler

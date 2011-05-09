@@ -34,6 +34,9 @@ static method runTests
 //        error("method signature wrong: " + etcSignature)
     }
     
+    if (!Etc.sBound) error("expecting this to be bound to class in Etc.sBound")
+    if (!etc.iBound.call(null, etc)) error("expecting this to be bound to instance in etc.iBound")
+    
     log("Etc tests pass")    
 
 //----------------------------------------------------------------------------
@@ -51,6 +54,14 @@ getter a
 //----------------------------------------------------------------------------
 setter a (value)
     return this._a = value
+
+//----------------------------------------------------------------------------
+static bind method sBound
+    return this == Etc
+
+//----------------------------------------------------------------------------
+bind method iBound(testThis)
+    return this == testThis
 
 //----------------------------------------------------------------------------
 function log(message)

@@ -250,7 +250,7 @@ class DirectiveClass(Directive):
         else:
             superclassText = "%s, " % superclassName
 
-        self.line = "var %s = scooj.defClass(module, %sfunction %s%s {" 
+        self.line = "var %s = scooj.defClass(module, %sfunction %s%s {scooj.bindMethods(this); " 
         self.line = self.line % (className, superclassText, className, methodParms)
             
     #---------------------------------------------------------------------------
@@ -280,7 +280,7 @@ class DirectiveMixin(Directive):
 #-------------------------------------------------------------------------------
 class DirectiveStaticMethod(Directive):
 
-    matchPattern = re.compile("^static\s+method\s+([\w$_]+)\s*(\(.*\))?\s*$")
+    matchPattern = re.compile("^static\s+((bind)\s+)?method\s+([\w$_]+)\s*(\(.*\))?\s*$")
 
     #---------------------------------------------------------------------------
     def __init__(self, fileName, line, lineNo, match):
@@ -288,15 +288,19 @@ class DirectiveStaticMethod(Directive):
 
     #---------------------------------------------------------------------------
     def compile(self):
-        methodName  = self.match.group(1)
-        methodParms = self.match.group(2)
+        isBound     = self.match.group(2)
+        methodName  = self.match.group(3)
+        methodParms = self.match.group(4)
         
         self.methodName = methodName
         
         if not methodParms: methodParms = "()"
         
-        self.line = "scooj.defStaticMethod(module, function %s%s {" 
-        self.line = self.line % (methodName, methodParms)
+        options = "{}"
+        if isBound: options = "{bind:true}" 
+
+        self.line = "scooj.defStaticMethod(module, %s, function %s%s {" 
+        self.line = self.line % (options, methodName, methodParms)
             
     #---------------------------------------------------------------------------
     def endingSuffix(self):
@@ -359,7 +363,7 @@ class DirectiveStaticSetter(Directive):
 #-------------------------------------------------------------------------------
 class DirectiveMethod(Directive):
 
-    matchPattern = re.compile("^method\s+([\w$_]+)\s*(\(.*\))?\s*$")
+    matchPattern = re.compile("^((bind)\s+)?method\s+([\w$_]+)\s*(\(.*\))?\s*$")
 
     #---------------------------------------------------------------------------
     def __init__(self, fileName, line, lineNo, match):
@@ -367,15 +371,19 @@ class DirectiveMethod(Directive):
 
     #---------------------------------------------------------------------------
     def compile(self):
-        methodName  = self.match.group(1)
-        methodParms = self.match.group(2)
+        isBound     = self.match.group(2)
+        methodName  = self.match.group(3)
+        methodParms = self.match.group(4)
         
         self.methodName = methodName
 
         if not methodParms: methodParms = "()"
         
-        self.line = "scooj.defMethod(module, function %s%s {" 
-        self.line = self.line % (methodName, methodParms)
+        options = "{}"
+        if isBound: options = "{bind:true}" 
+        
+        self.line = "scooj.defMethod(module, %s, function %s%s {" 
+        self.line = self.line % (options, methodName, methodParms)
             
     #---------------------------------------------------------------------------
     def endingSuffix(self):
