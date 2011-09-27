@@ -20,7 +20,44 @@ ExtensionJavaScript = ".coffee"
 
 Options = None
 
-CompileErrors = 0
+#-------------------------------------------------------------------------------
+class CompileStats:
+
+    def __init__(self):
+        self.errors     = 0
+        self.successes  = 0
+        self.ignores    = 0
+        self.errorCode  = []
+        self.funcNumber = 1
+
+    def addError(self,code):
+        self.errorCode.append(code)
+        self.errors += 1
+
+    def addSuccess(self,code):
+        self.successes += 1
+
+    def addIgnore(self,code):
+        self.ignores += 1
+
+    def nextFunctionName(self):
+        result = "__function__%d" % self.funcNumber
+        self.funcNumber += 1
+        return result
+
+    def report(self):
+        print "uncompilable functions:"
+        for errorCode in self.errorCode:
+            print errorCode
+            print
+
+        print "compile totals:"
+        print "   success: %3d" % self.successes
+        print "   errors:  %3d" % self.errors
+        print "   ignores: %3d" % self.ignores
+
+#-------------------------------------------------------------------------------
+compileStats = CompileStats()
 
 #-------------------------------------------------------------------------------
 def main():
@@ -41,6 +78,9 @@ def main():
             processDir(iFileName)
         else:
             processFile(iFileName)
+
+    print
+    compileStats.report()
 
 #-------------------------------------------------------------------------------
 def processFile(iFileName, path=""):
@@ -196,8 +236,6 @@ def compile(source, iFileName, path, baseName):
 
     return "\n".join(lines)
 
-#-------------------------------------------------------------------------------
-returnPattern = re.compile(r".*\s*return\s*$")
 
 #-------------------------------------------------------------------------------
 def fixComment(line):
@@ -210,6 +248,9 @@ def fixComment(line):
     line = line.replace(comm_old_c, comm_new_c)
 
     return line
+
+#-------------------------------------------------------------------------------
+returnPattern = re.compile(r".*\s+return\s*$")
 
 #-------------------------------------------------------------------------------
 def fixReturns(body):
@@ -247,24 +288,27 @@ def replaceSuperInvocations(className, methodName, methodBody):
 
 #-------------------------------------------------------------------------------
 def js2cs(body, params, indent):
-    global CompileErrors
     origBody = body
 
     if params == "": params = "()"
 
-#    body = fixReturns(body)
-    body = "function __x__%s {\n%s\n}" % (params, body.rstrip())
+    body = fixReturns(body)
+    body = "function %s%s {\n%s\n}" % (compileStats.nextFunctionName(),params, body.rstrip())
 
     process = subprocess.Popen(["js2coffee"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (stdout, stderr) = process.communicate(body)
 
     if (stderr != ""):
+        log("js2cs error: %s" % stderr)
+        stderrLines = stderr.split("\n")
+        stderrLines = ["// %s" % line for line in stderrLines]
+        stderrLines = "\n".join(stderrLines)
+        compileStats.addError("%s\n%s" % (body, stderrLines))
         body = "### FIXME compile error\n%s\n###\n" % origBody
         lines = body.split("\n")
-        CompileErrors += 1
-        print "compile error %d" % CompileErrors
 
     else:
+        compileStats.addSuccess(body)
         lines = stdout.split("\n")[1:]
 
     return ["%s%s" % (indent,line) for line in lines]
@@ -451,6 +495,7 @@ class DirectiveStaticGetter(Directive):
         self.line = "### FIXME\nstatic getter %s"
         self.line = self.line % (methodName)
         self.body.append("###\n")
+        compileStats.addIgnore("")
 
     #---------------------------------------------------------------------------
     def endingSuffix(self):
@@ -478,6 +523,7 @@ class DirectiveStaticSetter(Directive):
         self.line = "### FIXME\nstatic setter %s%s"
         self.line = self.line % (methodName, methodParms)
         self.body.append("###\n")
+        compileStats.addIgnore("")
 
     #---------------------------------------------------------------------------
     def endingSuffix(self):
@@ -539,6 +585,7 @@ class DirectiveGetter(Directive):
         self.line = "### FIXME getter %s"
         self.line = self.line % (methodName)
         self.body.append("###\n")
+        compileStats.addIgnore("")
 
     #---------------------------------------------------------------------------
     def endingSuffix(self):
@@ -567,6 +614,7 @@ class DirectiveSetter(Directive):
         self.line = "### FIXME setter %s%s"
         self.line = self.line % (methodName, methodParms)
         self.body.append("###\n")
+        compileStats.addIgnore("")
 
     #---------------------------------------------------------------------------
     def endingSuffix(self):
@@ -645,6 +693,7 @@ class DirectiveInit(Directive):
     def compile(self):
         self.line = "### FIXME init"
         self.body.append("###")
+        compileStats.addIgnore("")
 
 #-------------------------------------------------------------------------------
 class DirectiveRequire(Directive):
